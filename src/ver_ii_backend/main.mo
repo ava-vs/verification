@@ -1,4 +1,5 @@
 import Principal "mo:base/Principal";
+import Types "./Types";
 
 /*
   Controller for aVa project
@@ -8,10 +9,15 @@ actor {
     return "Hello, " # Principal.toText(message.caller) # "!";
   };
 
-  // default values
+  // default IC values
 
   let ver_canister_id = "4rouu-2iaaa-aaaal-qcahq-cai";
   let rep_canister_id = "4wpsa-xqaaa-aaaal-qcaha-cai";
+
+  // local values
+
+  let dnft_local = "bkyz2-fmaaa-aaaaa-qaaaq-cai";
+  let doctoken_local = "bkyz2-fmaaa-aaaaa-qaaaq-cai";
 
   // verification part 
 
@@ -36,5 +42,19 @@ actor {
     let rep = actor(rep_canister_id) : actor { incrementBalance: (Principal, Int) -> async (Principal, Int)};
     return await rep.incrementBalance(user, val);
   };
+
+  // dNFT part
+
+  public func mintNFT(to: Principal, author: Text, description : Text, hashsum : Text, link: Text) : async Types.MintReceipt {
+    let dNFT = actor(dnft_local) : actor { mintNFT: (Principal, Text, Text, Text, Text) -> async Types.MintReceipt };
+    return await dNFT.mintNFT(to, author, description, hashsum, link);
+  };
+
+  public func getAllNft() : async [Types.Nft] {
+    let dNFT = actor(dnft_local) : actor { getAllNft : () -> async [Types.Nft] };
+    return await dNFT.getAllNft();
+  };
+
+  // doctoken part
 
 };
