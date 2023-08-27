@@ -26,6 +26,8 @@ actor {
     return await ver.getBalance(user);
   };
 
+  //TODO uploadLink() 
+
   // reputation part
 
   public func getUsers() : async [(Principal, Int)] {
@@ -56,5 +58,15 @@ actor {
   };
 
   // doctoken part
+
+  public func minDocToken(to: Principal, author: Text, description : Text, hashsum : Text, link: Text) : async Types.MintReceipt {
+    let doc = actor(doctoken_local) : actor { mintNFT: (Principal, Text, Text, Text, Text) -> async Types.MintReceipt };
+    return await doc.mintNFT(to, author, description, hashsum, link);
+  };
+
+  public func getAllDocTokens() : async [Types.Nft] {
+    let doc = actor(doctoken_local) : actor { getAllNft : () -> async [Types.Nft] };
+    return await doc.getAllNft();
+  };
 
 };
