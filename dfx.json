@@ -4,6 +4,10 @@
       "main": "src/ver_ii_backend/main.mo",
       "type": "motoko"
     },
+    "rep": {
+      "main": "src/reputation/Reputation.mo",
+      "type": "motoko"
+    },
     "ver_ii_frontend": {
       "dependencies": [
         "ver_ii_backend",
