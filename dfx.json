@@ -12,11 +12,6 @@
       "main": "src/reputation/ReputationToken.mo",
       "type": "motoko"
     },
-    "shared_token": {
-      "main": "src/reputation/SharedToken.mo",
-      "type": "motoko"
-    },
-
     "ver_ii_frontend": {
       "dependencies": [
         "ver_ii_backend",
