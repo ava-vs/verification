@@ -5,9 +5,18 @@
       "type": "motoko"
     },
     "rep": {
-      "main": "src/reputation/main.mo",
+      "main": "src/reputation/Reputation.mo",
       "type": "motoko"
     },
+    "rep_token": {
+      "main": "src/reputation/ReputationToken.mo",
+      "type": "motoko"
+    },
+    "shared_token": {
+      "main": "src/reputation/SharedToken.mo",
+      "type": "motoko"
+    },
+
     "ver_ii_frontend": {
       "dependencies": [
         "ver_ii_backend",
