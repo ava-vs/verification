@@ -1,6 +1,5 @@
 import Principal "mo:base/Principal";
 import Types "./Types";
-import rep "../reputation/Reputation";
 
 /*
   Controller for aVa project

@@ -6,66 +6,57 @@ import Array "mo:base/Array";
 import TrieMap "mo:base/TrieMap";
 import Map "mo:base/HashMap";
 import Iter "mo:base/Iter";
+import HashMap "mo:base/HashMap";
+import Hash "mo:base/Hash";
+import Error "mo:base/Error";
+import Types "./Types";
 
 actor {
-
-    type DocId = Nat;
-
-    type Document = {
-    docId : DocId;
-    tags : [ Text ];
-    content : Text;
-    imageLink : Text; //(link to asset canister)
-
-  };
-
-  type UserDocuments = Map.HashMap<Principal, [DocId]>;
-
-  type Branch = Nat8;
-
-  type DocumentHistory = {
-    docId : DocId;
-    timestamp : Nat;
-    changedBy : Principal;
-    value : Int;
-    comment : Text;
-  };
+  type Document = Types.Document;
+  type Branch = Types.Branch;
+  type DocId = Types.DocId;
+  type Tag = Types.Tag;
+  type DocHistory = Types.DocumentHistory;
 
   stable var documents : [ Document ] = [];
   stable var userDocuments : ?[(Principal, [DocId])] = null;
+  var userDocumentMap = Map.HashMap<Principal, [DocId]>(10, Principal.equal, Principal.hash);
 
-  var userDocumentMap : UserDocuments = Map.HashMap<Principal, [DocId]>(10, Principal.equal, Principal.hash);
-// map docId - docHistory 
+  // map docId - docHistory 
+  var docHistory = Map.HashMap<DocId, DocHistory>(10, Nat.equal, Hash.hash);
 // map userId - [ Reputation ] or map userId - Map (branchId : value)
+  var userReputation = Map.HashMap<Principal, Map.HashMap<Branch, Int>>(1, Principal.equal, Principal.hash);
 // map tag : branchId
- public func getUserReputation(user: Principal) : async [ (Branch, Int)] {
+  var tagMap = TrieMap.TrieMap<Text, Branch>(Text.equal, Text.hash);
+
+
+    public func getUserReputation(user: Principal) : async [ (Branch, Int)] {
 
     return [];
- };
+    };
 
- public func getReputationByBranch(user: Principal, branchId: Text) : async ?(Branch, Int) {
+    public func getReputationByBranch(user: Principal, branchId: Text) : async ?(Branch, Int) {
     // Implement logic to get reputation value in a specific branch
     return null;  
   };
-  
-  public func setUserReputation(user: Principal, branchId: Text, value: Int) : async Bool {
+
+    public func setUserReputation(user: Principal, branchId: Text, value: Int) : async Bool {
     // Implement logic to set reputation value for a given user in a specific branch
     return false; 
   };
 
+  public func changeReputation(user : Principal, branchId : Branch, value : Int) : async Types.ChangeResult {
+      let res : Types.Change = (user, branchId, value);
+    // TODO validation: check ownership
 
+    // TODO get exist reputation : getUserReputation 
 
-// stable example for tags
+    // TODO change reputation:  setUserReputation
 
-  var map = Map.HashMap<Text, Map.HashMap<Text, Nat>>(10, Text.equal, Text.hash);
-stable var upgradeMap : [var (Text, [(Text, Nat)])] = [var];
+    // ?TODO save new state
 
-system func preupgrade() {
-    upgradeMap := Array.init(map.size(), ("", []));
-    var i = 0;
-    for ((x, y) in map.entries()) {
-      upgradeMap[i] := (x, Iter.toArray(y.entries()));
-      i += 1;
-    };
-};
+    // return new state
+
+    return #Ok( res );
+  }
 }

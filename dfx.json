@@ -5,7 +5,7 @@
       "type": "motoko"
     },
     "rep": {
-      "main": "src/reputation/Reputation.mo",
+      "main": "src/reputation/main.mo",
       "type": "motoko"
     },
     "ver_ii_frontend": {
@@ -37,7 +37,7 @@
   "defaults": {
     "build": {
       "args": "",
-      "packtool": ""
+      "packtool": "mops sources"
     }
   },
   "version": 1
