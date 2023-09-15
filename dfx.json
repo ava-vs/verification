@@ -12,6 +12,10 @@
       "main": "src/reputation/ReputationToken.mo",
       "type": "motoko"
     },
+    "ledger": {
+      "main": "src/reputation/Ledger.mo",
+      "type": "motoko"
+    },
     "ver_ii_frontend": {
       "dependencies": [
         "ver_ii_backend",

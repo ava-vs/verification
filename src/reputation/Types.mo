@@ -43,4 +43,6 @@ import Principal "mo:base/Principal";
 
   public type ChangeResult = Result<Change, ApiError>;
 
+  public type SharedResult = Result<Change, ApiError>;
+
 }

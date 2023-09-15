@@ -1,101 +1,120 @@
 import Nat8 "mo:base/Nat8";
+import Nat64 "mo:base/Nat64";
 import Principal "mo:base/Principal";
-import Token "../../icrc1/src/ICRC1/Canisters/Token";
-// import ICRC1 "../../icrc1/src/ICRC1"; 
-import T "Token";
+// import T "Token";
+import Time "mo:base/Time";
+import Blob "mo:base/Blob";
+import Buffer "mo:base/Buffer";
+import Array "mo:base/Array";
+// import ICRC1 "../../icrc1/src/ICRC1";
+import Ledger "canister:ledger";
 
-actor{
-    let decimals = 3; // replace with your chosen number of decimals
+actor ReputationToken {
+    let main_principal = Principal.fromText("ao6hk-x5zgr-aa6y2-zq5ei-meewq-doeim-hwbws-zzxql-rjtcc-hmabt-xqe");
+    let pre_mint_account = {
+        owner = main_principal;
+        subaccount = null;
+    };
+
+    // TODO get token consts from front-end
+    let token_name = "aVa Shared reputation token";
+    let token_symbol = "AVAS";
+    let token_fee = 6;
+    let max_supply = 1_000_000;
+    let token_init_balance = 100_000;
+    let min_burn_amount = 1;
+    let decimals = 3; 
 
     func add_decimals(n: Nat): Nat{
         n * 10 ** decimals
     };
 
-    let pre_mint_account = {
-        owner = Principal.fromText("ao6hk-x5zgr-aa6y2-zq5ei-meewq-doeim-hwbws-zzxql-rjtcc-hmabt-xqe");
-        subaccount = null;
-    };
-    // let token = await initialize();
+    //ledger part
 
-    public shared({ caller }) func initialize() : async () {
-        let token_canister = Token.Token({
-            name = "aVa Shared reputation token";
-            symbol = "AVAS";
-            decimals = Nat8.fromNat(decimals);
-            fee = add_decimals(6);
-            max_supply = add_decimals(1_000_000);
+  type Account = Ledger.Account; //{ owner : Principal; subaccount : ?Subaccount };
+  type Subaccount = Blob;
+  type Tokens = Ledger.Tokens; //Nat;
+  type Memo = Ledger.Memo;
+  type Timestamp = Ledger.Timestamp; //Nat64;
+  type Duration = Nat64;
+  type TxIndex = Ledger.TxIndex;
+  type TxLog = Buffer.Buffer<Transaction>;
 
-            // pre-mint 100,000 tokens for the account
-            initial_balances = [(pre_mint_account, add_decimals(100_000))]; 
+  type Value = Ledger.Value;
 
-            min_burn_amount = add_decimals(10);
-            minting_account = null; // defaults to the canister id of the caller
-            advanced_settings = null; 
-        });
-        
-    };
+  let permittedDriftNanos : Duration = 60_000_000_000;
+  let transactionWindowNanos : Duration = 24 * 60 * 60 * 1_000_000_000;
+  let defaultSubaccount : Subaccount = Blob.fromArrayMut(Array.init(32, 0 : Nat8));
 
-    public shared ({ caller }) func mint1(name : Text) : async (Principal, Text) {
-        let token = T.Token({
-             name = name;
-            symbol = "AVAS";
-            decimals = Nat8.fromNat(decimals);
-            fee = add_decimals(6);
-            max_supply = add_decimals(1_000_000);
+  type Operation = {
+    #Approve : Approve;
+    #Transfer : Transfer;
+    #Burn : Transfer;
+    #Mint : Transfer;
+  };
 
-            // pre-mint 100,000 tokens for the account
-            initial_balances = [(pre_mint_account, add_decimals(100_000))]; 
+  type CommonFields = {
+    memo : ?Memo;
+    fee : ?Tokens;
+    created_at_time : ?Timestamp;
+  };
 
-            min_burn_amount = add_decimals(10);
-            minting_account = null; // defaults to the canister id of the caller
-            advanced_settings = null; 
-        });
-        (caller, name);
-    };
+  type Approve = CommonFields and {
+    from : Account;
+    spender : Principal;
+    amount : Int;
+    expires_at : ?Nat64;
+  };
 
-    // //     /// Functions for the ICRC1 token standard
-    // public shared query func icrc1_name() : async Text {
-    //     ICRC1.name(token);
-    // };
+  type TransferSource = {
+    #Init;
+    #Icrc1Transfer;
+    #Icrc2TransferFrom;
+  };
 
-    // public shared query func icrc1_symbol() : async Text {
-    //     ICRC1.symbol(token);
-    // };
+  type Transfer = CommonFields and {
+    spender : Principal;
+    source : TransferSource;
+    to : Account;
+    from : Account;
+    amount : Tokens;
+  };
 
-    // public shared query func icrc1_decimals() : async Nat8 {
-    //     ICRC1.decimals(token);
-    // };
+  type Allowance = Ledger.Allowance;
 
-    // public shared query func icrc1_fee() : async ICRC1.Balance {
-    //     ICRC1.fee(token);
-    // };
+  type Transaction = {
+    operation : Operation;
+    // Effective fee for this transaction.
+    fee : Tokens;
+    timestamp : Timestamp;
+  };
 
-    // public shared query func icrc1_metadata() : async [ICRC1.MetaDatum] {
-    //     ICRC1.metadata(token);
-    // };
+  type DeduplicationError = {
+    #TooOld;
+    #Duplicate : { duplicate_of : TxIndex };
+    #CreatedInFuture : { ledger_time : Timestamp };
+  };
 
-    // public shared query func icrc1_total_supply() : async ICRC1.Balance {
-    //     ICRC1.total_supply(token);
-    // };
+  type CommonError = {
+    #InsufficientFunds : { balance : Tokens };
+    #BadFee : { expected_fee : Tokens };
+    #TemporarilyUnavailable;
+    #GenericError : { error_code : Nat; message : Text };
+  };
 
-    // public shared query func icrc1_minting_account() : async ?ICRC1.Account {
-    //     ?ICRC1.minting_account(token);
-    // };
+  type TransferError = Ledger.TransferError;
 
-    // public shared query func icrc1_balance_of(args : ICRC1.Account) : async ICRC1.Balance {
-    //     ICRC1.balance_of(token, args);
-    // };
+  type ApproveError = Ledger.ApproveError;
 
-    // public shared query func icrc1_supported_standards() : async [ICRC1.SupportedStandard] {
-    //     ICRC1.supported_standards(token);
-    // };
+  type TransferFromError = Ledger.TransferFromError;
 
-    // public shared ({ caller }) func icrc1_transfer(args : ICRC1.TransferArgs) : async ICRC1.TransferResult {
-    //     await* ICRC1.transfer(token, args, caller);
-    // };
+  public type Result<T, E> = { #Ok : T; #Err : E };
 
-    // public shared ({ caller }) func mint(args : ICRC1.Mint) : async ICRC1.TransferResult {
-    //     await* ICRC1.mint(token, args, caller);
-    // };
+// Logic part
+
+  public shared ({ caller }) func getSupply() : async Tokens { await Ledger.icrc1_total_supply();};
+
+  public shared ({ caller }) func getMetdata() : async [(Text, Value)]  { await Ledger.icrc1_metadata();};
+
 
 }
