@@ -32,11 +32,9 @@ echo "Trasfer:"
 
 dfx canister call ledger icrc1_transfer '(vec {
     record {
-     "from_subaccount"= null,
-     "to": record { owner="ao6hk-x5zgr-aa6y2-zq5ei-meewq-doeim-hwbws-zzxql-rjtcc-hmabt-xqe"; subaccount=0},
-     "amount"= 1,
-     "fee"= 0,
-     "memo"= null,
-     "created_at_time"= null }
+     "to": record { owner=principal "ao6hk-x5zgr-aa6y2-zq5ei-meewq-doeim-hwbws-zzxql-rjtcc-hmabt-xqe";
+      subaccount=opt vec {0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0}};
+    "amount" = 1;
+     }
      })'
 
