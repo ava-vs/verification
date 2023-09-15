@@ -10,6 +10,7 @@ import HashMap "mo:base/HashMap";
 import Hash "mo:base/Hash";
 import Error "mo:base/Error";
 import Types "./Types";
+import RToken "canister: rep_token";
 
 actor {
   type Document = Types.Document;
@@ -31,7 +32,7 @@ actor {
 
 
     public func getUserReputation(user: Principal) : async [ (Branch, Int)] {
-
+      RToken.getBalance(user);
     return [];
     };
 

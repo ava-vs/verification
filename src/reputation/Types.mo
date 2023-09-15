@@ -2,13 +2,13 @@
 import Principal "mo:base/Principal";
 
     module {
-        public type DocId = Nat;
+    public type DocId = Nat;
 
-        public type Document = {
-        docId : DocId;
-        tags : [ Text ];
-        content : Text;
-        imageLink : Text; //(link to asset canister)
+    public type Document = {
+    docId : DocId;
+    tags : [ Text ];
+    content : Text;
+    imageLink : Text; //(data url or link to asset canister)
 
     };
 
