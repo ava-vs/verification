@@ -10,7 +10,7 @@ import HashMap "mo:base/HashMap";
 import Hash "mo:base/Hash";
 import Error "mo:base/Error";
 import Types "./Types";
-import RToken "canister: rep_token";
+import RToken "canister:rep_token";
 
 actor {
   type Document = Types.Document;

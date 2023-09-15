@@ -13,9 +13,30 @@ dfx canister install ver_ii_frontend
 
 dfx deploy --argument '(record { initial_mints = 
     vec { 
-        record { account = record { owner = principal "aaaaa-aa"; subaccount = null }; amount = 1000 } }; 
-        minting_account = record { owner = principal "aaaaa-aa"; subaccount = null };
+        record { account = record { 
+            owner = principal "ao6hk-x5zgr-aa6y2-zq5ei-meewq-doeim-hwbws-zzxql-rjtcc-hmabt-xqe"; subaccount = null }; amount = 1000 } }; 
+        minting_account = record { owner = principal "ao6hk-x5zgr-aa6y2-zq5ei-meewq-doeim-hwbws-zzxql-rjtcc-hmabt-xqe"; subaccount = null };
         token_name = "aVa Reputation Token"; 
         token_symbol = "AVAR"; 
-        decimals = 18; 
+        decimals = 6; 
         transfer_fee = 0 })' ledger
+
+echo "Getting init balance branch 0: "
+dfx canister call rep_token userBalanceByBranch '(0)'
+
+echo "Getting init balance branch 1: "
+
+
+dfx canister call rep_token userBalanceByBranch '(1)'
+echo "Trasfer:"
+
+dfx canister call ledger icrc1_transfer '(vec {
+    record {
+     "from_subaccount"= null,
+     "to": record { owner="ao6hk-x5zgr-aa6y2-zq5ei-meewq-doeim-hwbws-zzxql-rjtcc-hmabt-xqe"; subaccount=0},
+     "amount"= 1,
+     "fee"= 0,
+     "memo"= null,
+     "created_at_time"= null }
+     })'
+

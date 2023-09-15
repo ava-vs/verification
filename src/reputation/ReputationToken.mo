@@ -7,6 +7,7 @@ import Blob "mo:base/Blob";
 import Buffer "mo:base/Buffer";
 import Array "mo:base/Array";
 import Error "mo:base/Error";
+import Int "mo:base/Int";
 // import ICRC1 "../../icrc1/src/ICRC1";
 import Ledger "canister:ledger";
 
@@ -142,18 +143,18 @@ public func addSubaccount(user : Principal, branch : Nat8) : async Account {
   public func awardToken(from : Ledger.Account, to : Ledger.Account, amount : Ledger.Tokens) : async Bool {
     let sender : ?Ledger.Subaccount = from.subaccount;
     let memo : ?Ledger.Memo = null;
-    let fee : ?Ledger.Tokens = ?100;
-    let created_at_time : ?Ledger.Timestamp = null;
+    let fee : ?Ledger.Tokens = ?0;
+    let created_at_time : ?Ledger.Timestamp = ?Nat64.fromIntWrap(Time.now());
     let a : Ledger.Tokens = amount;
     let acc : Ledger.Account = to;
-    let res = await Ledger.icrc1_transfer(
-      sender,
-      to,
-      a,
-      fee,
-      memo,
-      created_at_time
-      );
+    let res = await Ledger.icrc1_transfer({
+      from_subaccount = sender;
+      to = to;
+      amount = amount;
+      fee = fee;
+      memo = memo;
+      created_at_time = created_at_time;     
+    });
     let b : Bool = switch (res) {
       case (#Ok(id)) true;
       case (#Err(err)) false;
