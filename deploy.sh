@@ -30,11 +30,11 @@ echo "Getting init balance branch 1: "
 dfx canister call rep_token userBalanceByBranch '(1)'
 echo "Trasfer:"
 
-dfx canister call ledger icrc1_transfer '(vec {
+dfx canister call ledger icrc1_transfer '(
     record {
-     "to": record { owner=principal "ao6hk-x5zgr-aa6y2-zq5ei-meewq-doeim-hwbws-zzxql-rjtcc-hmabt-xqe";
-      subaccount=opt vec {0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0}};
+     "to": record { 
+        owner=principal "ao6hk-x5zgr-aa6y2-zq5ei-meewq-doeim-hwbws-zzxql-rjtcc-hmabt-xqe";
+        subaccount=opt vec {0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 1}};
     "amount" = 1;
-     }
-     })'
+    })'
 

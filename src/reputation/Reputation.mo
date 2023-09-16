@@ -32,18 +32,24 @@ actor {
 
 
     public func getUserReputation(user: Principal) : async [ (Branch, Int)] {
-      RToken.getBalance(user);
+      // RToken.getBalance(user);
     return [];
     };
 
-    public func getReputationByBranch(user: Principal, branchId: Text) : async ?(Branch, Int) {
+    public func getReputationByBranch(user: Principal, branchId: Nat8) : async ?(Branch, Nat) {
     // Implement logic to get reputation value in a specific branch
-    return null;  
+    let res = await RToken.userBalanceByBranch(branchId);
+    return ?(branchId, res);  
   };
 
-    public func setUserReputation(user: Principal, branchId: Text, value: Int) : async Bool {
-    // Implement logic to set reputation value for a given user in a specific branch
-    return false; 
+    public func setUserReputation(user: Principal, branchId: Nat8, value: Nat) : async Text {
+    // set reputation value for a given user in a specific branch
+    let sub = ?(await RToken.createSubaccountByBranch(branchId));
+    let res = await RToken.awardToken({ owner=user; subaccount=sub }, value);
+    switch (res) {
+      case (#Ok(id)) return Nat.toText(id);
+      case (#Err(err)) return "Error ";
+    }
   };
 
   public func changeReputation(user : Principal, branchId : Branch, value : Int) : async Types.ChangeResult {

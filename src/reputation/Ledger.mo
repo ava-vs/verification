@@ -130,6 +130,29 @@ actor class Ledger(init : { initial_mints : [{ account : { owner : Principal; su
     sum;
   };
 
+   // Computes the balance of all subaccounts.
+  func balance_all_subaccounts(account : Account, log : TxLog) : Nat {
+    var sum = 0;
+    for (tx in log.vals()) {
+      switch (tx.operation) {
+        case (#Burn(args)) {
+          if (Principal.equal(args.from.owner, account.owner)) { sum -= args.amount };
+        };
+        case (#Mint(args)) {
+          if (Principal.equal(args.to.owner, account.owner)) { sum += args.amount };
+        };
+        case (#Transfer(args)) {
+          if (Principal.equal(args.from.owner, account.owner)) {
+            sum -= args.amount + tx.fee;
+          };
+          if (Principal.equal(args.to.owner, account.owner)) { sum += args.amount };
+        };
+        case (#Approve(_)) {};
+      };
+    };
+    sum;
+  };
+
   // Computes the total token supply.
   func totalSupply(log : TxLog) : Tokens {
     var total = 0;
@@ -399,6 +422,10 @@ actor class Ledger(init : { initial_mints : [{ account : { owner : Principal; su
     balance(account, log);
   };
 
+  public query func icrc1_balance_by_principal(account : Account) : async Tokens {
+    balance_all_subaccounts(account, log);
+  };
+
   public query func icrc1_total_supply() : async Tokens {
     totalSupply(log);
   };
@@ -523,7 +550,7 @@ actor class Ledger(init : { initial_mints : [{ account : { owner : Principal; su
     created_at_time : ?Timestamp;
   }) : async Result<TxIndex, TransferFromError> {
     let transfer : Transfer = {
-      spender = caller;
+      spender = from.owner;
       source = #Icrc2TransferFrom;
       from = from;
       to = to;
@@ -533,9 +560,9 @@ actor class Ledger(init : { initial_mints : [{ account : { owner : Principal; su
       created_at_time = created_at_time;
     };
 
-    if (caller == from.owner) {
+    // if (caller == from.owner) {
       return applyTransfer(transfer);
-    };
+    // };
 
     validateSubaccount(from.subaccount);
     validateSubaccount(to.subaccount);

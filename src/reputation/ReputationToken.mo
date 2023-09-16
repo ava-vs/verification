@@ -1,7 +1,6 @@
 import Nat8 "mo:base/Nat8";
 import Nat64 "mo:base/Nat64";
 import Principal "mo:base/Principal";
-// import T "Token";
 import Time "mo:base/Time";
 import Blob "mo:base/Blob";
 import Buffer "mo:base/Buffer";
@@ -10,11 +9,15 @@ import Error "mo:base/Error";
 import Int "mo:base/Int";
 import Nat "mo:base/Nat";
 import Bool "mo:base/Bool";
-// import ICRC1 "../../icrc1/src/ICRC1";
 import Ledger "canister:ledger";
+import Types "Types";
 
 actor ReputationToken {
     let main_principal = Principal.fromText("ao6hk-x5zgr-aa6y2-zq5ei-meewq-doeim-hwbws-zzxql-rjtcc-hmabt-xqe");
+    
+    // null subaccount will be use as shared token wallet
+    // 1 subaccount is incenitive subaccount
+    // other subaccounts are branch ids
     let pre_mint_account = {
         owner = main_principal;
         subaccount = null;
@@ -106,6 +109,13 @@ actor ReputationToken {
     #GenericError : { error_code : Nat; message : Text };
   };
 
+  type BurnError = CommonError or {
+    #WrongBranch : { current_branch : Nat8; target_branch : Nat8};
+    #WrongDocument : { current_branch : Nat8; document : Types.DocId };
+    #InsufficientReputation : { current_branch : Nat8; balance : Tokens };
+    #DocumentReputationReductionLimitReached : { document : Types.DocId };
+  };
+
   type TransferError = Ledger.TransferError;
 
   type ApproveError = Ledger.ApproveError;
@@ -151,8 +161,8 @@ public shared({ caller }) func demo() : async Text {
   };
   // let respose : Bool = await awardToken({ owner = m_acc.owner; subaccount = sub }, to, 1);
   res := res # "From: owner: " # Principal.toText(m_acc.owner) # ", subacc: " # m_sub_text;
-  let respose = await Ledger.icrc1_transfer({
-      from_subaccount = m_acc.subaccount;
+  let respose = await Ledger.icrc2_transfer_from({
+      from = m_acc;
       to = to;
       amount = 1;
       fee = null;
@@ -180,6 +190,9 @@ public shared({ caller }) func demo() : async Text {
         };
         case (#InsufficientFunds {balance}) {
           "InsufficientFunds with balance: " # Nat.toText(balance)
+        };
+        case (#InsufficientAllowance {allowance:Nat}) {
+          "InsufficientAllowance: " # Nat.toText(allowance);
         };
         case (#TemporarilyUnavailable) {
           "TemporarilyUnavailable"
@@ -217,36 +230,94 @@ public func addSubaccount(user : Principal, branch : Nat8) : async Account {
 
   public shared ({ caller }) func getMetdata() : async [(Text, Value)]  { await Ledger.icrc1_metadata();};
 
-  public shared ( { caller } ) func userBalanceByBranch(branch : Nat8) : async Nat {
+  public shared ( { caller } ) func userBalanceByBranch(user : Principal, branch : Nat8) : async Nat {
     let sub = await createSubaccountByBranch(branch);
-    let checkSub = { owner = caller; subaccount = ?sub };
-    await Ledger.icrc1_balance_of(checkSub);
+    let addSub = { owner = user; subaccount = ?sub };
+    await Ledger.icrc1_balance_of(addSub);
 };
 
   // Increase reputation
-  public func awardToken(from : Ledger.Account, to : Ledger.Account, amount : Ledger.Tokens) : async Bool {
-    let sender : ?Ledger.Subaccount = from.subaccount;
+  // using pre_mint_account as from
+
+  public func awardToken(to : Ledger.Account, amount : Ledger.Tokens) : async Result<TxIndex, TransferFromError> {
     let memo : ?Ledger.Memo = null;
     let fee : ?Ledger.Tokens = null;
     let created_at_time : ?Ledger.Timestamp = ?Nat64.fromIntWrap(Time.now());
-    let a : Ledger.Tokens = amount;
-    let acc : Ledger.Account = to;
-    let res = await Ledger.icrc1_transfer({
-      from_subaccount = sender;
+    let res = await Ledger.icrc2_transfer_from({
+      from =  pre_mint_account;
       to = to;
       amount = amount;
       fee = fee;
       memo = memo;
       created_at_time = created_at_time;     
     });
-    let b : Bool = switch (res) {
-      case (#Ok(id)) true;
-      case (#Err(err)) false;
-    }
+  };
+
+  public func sendToken(from : Ledger.Account, to : Ledger.Account, amount : Ledger.Tokens) : async Result<TxIndex, TransferFromError> {
+    let sender : ?Ledger.Subaccount = from.subaccount;
+    let memo : ?Ledger.Memo = null;
+    let fee : ?Ledger.Tokens = null;
+    let created_at_time : ?Ledger.Timestamp = ?Nat64.fromIntWrap(Time.now());
+    let a : Ledger.Tokens = amount;
+    let acc : Ledger.Account = to;
+    let res = await Ledger.icrc2_transfer_from({
+      from = from;
+      to = to;
+      amount = amount;
+      fee = fee;
+      memo = memo;
+      created_at_time = created_at_time;     
+    });
+    ignore await awardIncenitive(from, 1);
+    res;
   };
 
   // Decrease reputation
+  public func burnToken(from : Ledger.Account, amount : Ledger.Tokens) : async Result<TxIndex, TransferFromError> {
+    let sender : ?Ledger.Subaccount = from.subaccount;
+    let memo : ?Ledger.Memo = null;
+    let fee : ?Ledger.Tokens = ?0;
+    let created_at_time : ?Ledger.Timestamp = ?Nat64.fromIntWrap(Time.now());
+    let a : Ledger.Tokens = amount;
+    let res = await Ledger.icrc2_transfer_from({
+      from = from;
+      to = pre_mint_account;
+      amount = amount;
+      fee = fee;
+      memo = memo;
+      created_at_time = created_at_time;     
+    });
+  };
 
+    public func askForBurn(
+      requester : Ledger.Account, 
+      from : Ledger.Account, 
+      document : Types.DocId, 
+      amount : Ledger.Tokens
+      ) : async Result<TxIndex, TransferError> {
+      // check requester's balance
+      // check from balance
+      // check document's tags for equity to requester's subaccount
+      // burn requester's token
+      // burn from token
+      // create history log
 
+      return #Err(#TemporarilyUnavailable);
+    };
+
+  // Incenitive
+    public func awardIncenitive(to : Ledger.Account, amount : Ledger.Tokens) : async Result<TxIndex, TransferFromError>  {
+    let memo : ?Ledger.Memo = null;
+    let created_at_time : ?Ledger.Timestamp = ?Nat64.fromIntWrap(Time.now());
+    let receiver : Ledger.Account = { owner = to.owner; subaccount = ?(await createSubaccountByBranch(1))};
+    let res = await Ledger.icrc2_transfer_from({
+      from =  pre_mint_account;
+      to = receiver;
+      amount = amount;
+      fee = ?0;
+      memo = memo;
+      created_at_time = created_at_time;     
+    });
+  };
 
 }
