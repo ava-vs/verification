@@ -29,16 +29,19 @@ actor {
     };
 
   stable var documents : [ Document ] = [];
-  stable var userDocuments : ?[(Principal, [DocId])] = null;
+  let emptyBuffer = Buffer.Buffer<(Principal, [DocId])>(0);
+  stable var userDocuments : [(Principal, [DocId])] = Buffer.toArray(emptyBuffer);
   var userDocumentMap = Map.HashMap<Principal, [DocId]>(10, Principal.equal, Principal.hash);
 
   // map docId - docHistory 
   var docHistory = Map.HashMap<DocId, DocHistory>(10, Nat.equal, Hash.hash);
   // map userId - [ Reputation ] or map userId - Map (branchId : value)
+  // TODO add stable storage for reputation
   var userReputation = Map.HashMap<Principal, Map.HashMap<Branch, Nat>>(1, Principal.equal, Principal.hash);
   // map tag : branchId
   var tagMap = TrieMap.TrieMap<Text, Branch>(Text.equal, Text.hash);
-
+    // TODO add stable storage for shared reputation
+  var userSharedReputation = Map.HashMap<Principal, Map.HashMap<Branch, Nat>>(1, Principal.equal, Principal.hash);
 
   public func getUserReputation(user: Principal) : async [(Branch, Nat)] {
     let reputationMap = userReputation.get(user);
@@ -114,5 +117,82 @@ actor {
     // return new state
 
     return #Ok( res );
-  }
+  };
+
+  // Shared part
+
+  public func sharedReputationDistrube() : async Types.Result<Text, Types.TransferBurnError> {
+    // let default_acc = { owner = Principal.fromText("aaaaa-aa"); subaccount = null };
+    var res = #Ok("Shared ");
+    var sum = 0;
+    let mint_acc = await RToken.getMintingAccount();
+    label one for((user, entry) in userReputation.entries()) {
+      if (Principal.equal(mint_acc, user)) continue one;
+      var balance = 0;
+      for((branch, value) in entry.entries()) {
+        balance += value;      
+      };
+      // switch on error, return #Err
+      let result = await RToken.awardToken({ owner=user; subaccount= null }, balance);
+      userSharedReputation.put(user, entry);
+      res := switch (result) {
+        case (#Ok(id)) { sum +=1;
+          #Ok(" Shared");
+        };
+        case (#Err(err)) return #Err(err);
+      };
+    };
+    return #Ok("Tokens were shared  to " # Nat.toText(sum) # " accounts");
+  };
+
+  // Doctoken part
+
+  public func getDocumentsByUser(user : Principal) : async [ Document ] {
+    let docIdList = Option.get(userDocumentMap.get(user), []);
+    var result = Buffer.Buffer<Document>(1);
+    label one for(documentId in docIdList.vals()) {
+      let document = Array.find<Document>(documents, func doc = Nat.equal(documentId, doc.docId));
+      switch (document) {
+        case null continue one;
+        case (?d) result.add(d);
+      };   
+    };  
+    Buffer.toArray(result);
+  };
+
+  public func getDocumentById(id : DocId) : async Types.Result<Document, Text> {
+    let document = Array.find<Document>(documents, func doc = Nat.equal(id, doc.docId));
+    switch (document) {
+      case null #Err("No documents found by id " # Nat.toText(id));
+      case (?doc) #Ok(doc);
+    }
+  };
+
+  public func getDocumentsByBranch(branch : Branch) : async [ Document ] {
+    let document = Array.find<Document>(documents, func doc = Text.equal(Nat8.toText(branch), doc.tags[0]));
+
+    switch(document) {
+      case null [];
+      case (?doc) [doc];
+    };
+  };
+
+  public func setDocumentByUser(user : Principal, branch: Branch, document : Document) : async Types.Result<Document, Text> {
+    let nextId = documents.size();
+    let docList = Option.get(userDocumentMap.get(user), []);
+    let newDoc = {
+      docId = nextId;
+      tags = document.tags;
+      content = document.content;
+      imageLink = document.imageLink;
+    };   
+    documents := Array.append(documents, [newDoc]);
+    let newList =  Array.append(docList, [nextId]);
+    userDocumentMap.put(user, newList);
+    // TODO documents.add(newDoc) on postupgrade
+
+
+    return #Ok(newDoc);
+  };
+  
 }

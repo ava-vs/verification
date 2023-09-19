@@ -10,6 +10,7 @@ import Int "mo:base/Int";
 import Nat "mo:base/Nat";
 import Bool "mo:base/Bool";
 import Iter "mo:base/Iter";
+import Result "mo:base/Result";
 import Ledger "canister:ledger";
 import Types "Types";
 
@@ -209,7 +210,13 @@ func subaccountToNatArray(subaccount : Subaccount) : [ Nat8 ] {
 
   // public shared ({ caller }) func getSupply() : async Tokens { await Ledger.icrc1_total_supply();};
 
-  // public shared ({ caller }) func getMetdata() : async [(Text, Types.Value)]  { await Ledger.icrc1_metadata();};
+  public func getMintingAccount() : async Principal  { 
+    let acc = await Ledger.icrc1_minting_account();
+    switch (acc) {
+      case null Principal.fromText("aaaaa-aa");
+      case (?account) account.owner;
+    };
+  };
 
   public func userBalanceByBranch(user : Principal, branch : Nat8) : async Nat {
     let sub = await createSubaccountByBranch(branch);
@@ -316,4 +323,8 @@ func subaccountToNatArray(subaccount : Subaccount) : [ Nat8 ] {
     });
   };
 
+  // Scheduler part
+  // public func distributeTokens(user: Principal, branch : Nat8, value : Nat) : async Result<Bool, TransferFromError> {
+  //   sendToken
+  // };
 }
