@@ -46,8 +46,12 @@ actor {
       case null return [];
       case (?reputationMap) reputationMap;
     };
+    var buffer = Buffer.Buffer<(Branch, Nat)>(1);
+    for((br, item) in map.entries()) {
+      buffer.add(br, item);
+    };
 
-    return Iter.toArray(map.vals());
+    return Buffer.toArray(buffer);
   };
 
   public func getReputationByBranch(user: Principal, branchId: Nat8) : async ?(Branch, Nat) {

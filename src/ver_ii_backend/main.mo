@@ -90,9 +90,9 @@ actor {
     (user, branch, balance );
   };
   
-  public func setUserReputation(user: Principal, branchId: Text, value: Int) : async Bool {
-    // Implement logic to set reputation value for a given user in a specific branch
-    return false; 
+  public func setUserReputation(user: Principal, branchId: Nat8, value: Nat) : async Types.Result<(rep.Account, Nat),rep.TransferBurnError> {
+      let res = await rep.setUserReputation(user, branchId, value); 
+
   };
 
   // dNFT part
