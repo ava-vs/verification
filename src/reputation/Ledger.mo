@@ -8,93 +8,51 @@ import Time "mo:base/Time";
 import Int "mo:base/Int";
 import Nat8 "mo:base/Nat8";
 import Nat64 "mo:base/Nat64";
+// import Transfer "mo:icrc1/ICRC1/Transfer";
+import T "Types";
 
 actor class Ledger(init : { initial_mints : [{ account : { owner : Principal; subaccount : ?Blob }; amount : Nat }]; minting_account : { owner : Principal; subaccount : ?Blob }; token_name : Text; token_symbol : Text; decimals : Nat8; transfer_fee : Nat }) = this {
 
-  public type Account = { owner : Principal; subaccount : ?Subaccount };
-  public type Subaccount = Blob;
-  public type Tokens = Nat;
-  public type Memo = Blob;
-  public type Timestamp = Nat64;
-  public type Duration = Nat64;
-  public type TxIndex = Nat;
-  public type TxLog = Buffer.Buffer<Transaction>;
+  type Account = T.Account;
+  type Subaccount = T.Subaccount;
+  type Tokens = T.Tokens;
+  type Memo = T.Memo;
+  type Timestamp = T.Timestamp;
+  type Duration = T.Duration;
+  type TxIndex = T.TxIndex;
+  type TxLog = Buffer.Buffer<T.Transaction>;
 
-  public type Value = { #Nat : Nat; #Int : Int; #Blob : Blob; #Text : Text };
+  type Value = T.Value;
 
   let permittedDriftNanos : Duration = 60_000_000_000;
   let transactionWindowNanos : Duration = 24 * 60 * 60 * 1_000_000_000;
   let defaultSubaccount : Subaccount = Blob.fromArrayMut(Array.init(32, 0 : Nat8));
 
-  public type Operation = {
-    #Approve : Approve;
-    #Transfer : Transfer;
-    #Burn : Transfer;
-    #Mint : Transfer;
-  };
+  type Operation = T.Operation;
 
-  public type CommonFields = {
-    memo : ?Memo;
-    fee : ?Tokens;
-    created_at_time : ?Timestamp;
-  };
+  type CommonFields = T.CommonFields;
 
-  public type Approve = CommonFields and {
-    from : Account;
-    spender : Principal;
-    amount : Int;
-    expires_at : ?Nat64;
-  };
+  type Approve = T.Approve;
 
-  public type TransferSource = {
-    #Init;
-    #Icrc1Transfer;
-    #Icrc2TransferFrom;
-  };
+  type TransferSource = T.TransferSource;
 
-  public type Transfer = CommonFields and {
-    spender : Principal;
-    source : TransferSource;
-    to : Account;
-    from : Account;
-    amount : Tokens;
-  };
+  type Transfer = T.Transfer;
 
-  public type Allowance = { allowance : Nat; expires_at : ?Nat64 };
+  type Allowance = T.Allowance;
 
-  public type Transaction = {
-    operation : Operation;
-    // Effective fee for this transaction.
-    fee : Tokens;
-    timestamp : Timestamp;
-  };
+  type Transaction = T.Transaction;
 
-  public type DeduplicationError = {
-    #TooOld;
-    #Duplicate : { duplicate_of : TxIndex };
-    #CreatedInFuture : { ledger_time : Timestamp };
-  };
+  type DeduplicationError = T.DeduplicationError;
 
-  public type CommonError = {
-    #InsufficientFunds : { balance : Tokens };
-    #BadFee : { expected_fee : Tokens };
-    #TemporarilyUnavailable;
-    #GenericError : { error_code : Nat; message : Text };
-  };
+  type CommonError = T.CommonError;
 
-  public type TransferError = DeduplicationError or CommonError or {
-    #BadBurn : { min_burn_amount : Tokens };
-  };
+  type TransferError = T.TransferError;
 
-  public type ApproveError = DeduplicationError or CommonError or {
-    #Expired : { ledger_time : Nat64 };
-  };
+  type ApproveError = T.ApproveError;
 
-  public type TransferFromError = TransferError or {
-    #InsufficientAllowance : { allowance : Nat };
-  };
+  type TransferFromError = T.TransferFromError;
 
-  public type Result<T, E> = { #Ok : T; #Err : E };
+  type Result<T, E> = T.Result<T, E>;
 
   // Checks whether two accounts are semantically equal.
   func accountsEqual(lhs : Account, rhs : Account) : Bool {
