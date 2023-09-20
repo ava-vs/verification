@@ -218,6 +218,10 @@ func subaccountToNatArray(subaccount : Subaccount) : [ Nat8 ] {
     };
   };
 
+  public func getUserBalance(user : Principal) : async Nat {
+    await Ledger.icrc1_balance_by_principal({ owner=user; subaccount=null});
+  };
+
   public func userBalanceByBranch(user : Principal, branch : Nat8) : async Nat {
     let sub = await createSubaccountByBranch(branch);
     let addSub : Ledger.Account = { owner = user; subaccount = ?subaccountToNatArray(sub) };

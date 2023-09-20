@@ -14,23 +14,15 @@
 
       };
 
-      // public type Tokens = Nat;
-      // public type TxIndex = Nat;
-      // public type Timestamp = Nat64;
-      // public type Memo = Blob;
-      // public type Account = { owner : Principal; subaccount : ?Subaccount };
-      // public type Subaccount = Blob;
-
-
-      public type UserDocuments = Map.HashMap<Principal, [DocId]>;
+      // public type UserDocuments = Map.HashMap<Principal, [DocId]>;
 
       public type Branch = Nat8;
 
       public type DocumentHistory = {
           docId : DocId;
-          timestamp : Nat;
+          timestamp : Int;
           changedBy : Principal;
-          value : Int;
+          value : Nat8;
           comment : Text;
       };
 
@@ -120,6 +112,7 @@
     #BadFee : { expected_fee : Tokens };
     #TemporarilyUnavailable;
     #GenericError : { error_code : Nat; message : Text };
+    #NotFound : { message : Text; docId : DocId }
   };
 
   public type TransferError = DeduplicationError or CommonError or {

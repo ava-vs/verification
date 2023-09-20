@@ -73,7 +73,7 @@ actor {
   //   return await rep.incrementBalance(user, val);
   // };
 
-  public func getUserReputation(user: Principal) : async [ (Branch, Nat)] {
+  public func getUserReputation(user: Principal) : async Nat {
     await rep.getUserReputation(user);    
      
   };

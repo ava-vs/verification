@@ -8,12 +8,12 @@ import Map "mo:base/HashMap";
 import Iter "mo:base/Iter";
 import HashMap "mo:base/HashMap";
 import Hash "mo:base/Hash";
-import Error "mo:base/Error";
 import Nat8 "mo:base/Nat8";
 import Nat32 "mo:base/Nat32";
 import Option "mo:base/Option";
 import Blob "mo:base/Blob";
 import Buffer "mo:base/Buffer";
+import Time "mo:base/Time";
 import Types "./Types";
 import RToken "canister:rep_token";
 
@@ -23,6 +23,13 @@ actor {
   type DocId = Types.DocId;
   type Tag = Types.Tag;
   type DocHistory = Types.DocumentHistory;
+  
+  type DocDAO = {
+    // main_branch : Tag;
+    tags : [ Tag ];
+    content : Text;
+    imageLink : Text;
+  };
 
     let hashBranch = func (x: Branch): Nat32 {
       return Nat32.fromNat(Nat8.toNat(x * 7)); 
@@ -43,18 +50,19 @@ actor {
     // TODO add stable storage for shared reputation
   var userSharedReputation = Map.HashMap<Principal, Map.HashMap<Branch, Nat>>(1, Principal.equal, Principal.hash);
 
-  public func getUserReputation(user: Principal) : async [(Branch, Nat)] {
-    let reputationMap = userReputation.get(user);
-    let map = switch (reputationMap) {
-      case null return [];
-      case (?reputationMap) reputationMap;
-    };
-    var buffer = Buffer.Buffer<(Branch, Nat)>(1);
-    for((br, item) in map.entries()) {
-      buffer.add(br, item);
-    };
+  public func getUserReputation(user: Principal) : async Nat {
+    let balance = await RToken.getUserBalance(user);
+    // let reputationMap = userReputation.get(user);
+    // let map = switch (reputationMap) {
+    //   case null return [];
+    //   case (?reputationMap) reputationMap;
+    // };
+    // var buffer = Buffer.Buffer<(Branch, Nat)>(1);
+    // for((br, item) in map.entries()) {
+    //   buffer.add(br, item);
+    // };
 
-    return Buffer.toArray(buffer);
+    // return Buffer.toArray(buffer);
   };
 
   public func getReputationByBranch(user: Principal, branchId: Nat8) : async ?(Branch, Nat) {
@@ -71,9 +79,8 @@ actor {
   Buffer.toArray(buffer);
 };
 
-
-  public func setUserReputation(user: Principal, branchId: Nat8, value: Nat) : async Types.Result<(Types.Account, Nat),Types.TransferBurnError> {
   // set reputation value for a given user in a specific branch
+  public func setUserReputation(user: Principal, branchId: Nat8, value: Nat) : async Types.Result<(Types.Account, Nat),Types.TransferBurnError> {
   let sub = await RToken.createSubaccountByBranch(branchId);
   
   let res = await RToken.awardToken({ owner=user; subaccount= ?Blob.fromArray(subaccountToNatArray(sub)) }, value);
@@ -103,7 +110,7 @@ actor {
     };
   };
 
-
+  // universal method for award/burn reputation
   public func changeReputation(user : Principal, branchId : Branch, value : Int) : async Types.ChangeResult {
       let res : Types.Change = (user, branchId, value);
     // TODO validation: check ownership
@@ -169,7 +176,7 @@ actor {
   };
 
   public func getDocumentsByBranch(branch : Branch) : async [ Document ] {
-    let document = Array.find<Document>(documents, func doc = Text.equal(Nat8.toText(branch), doc.tags[0]));
+    let document = Array.find<Document>(documents, func doc = Text.equal(getTagByBranch(branch), doc.tags[0]));
 
     switch(document) {
       case null [];
@@ -177,12 +184,16 @@ actor {
     };
   };
 
-  public func setDocumentByUser(user : Principal, branch: Branch, document : Document) : async Types.Result<Document, Text> {
+  public func setDocumentByUser(user : Principal, branch: Branch, document : DocDAO) : async Types.Result<Document, Text> {
     let nextId = documents.size();
     let docList = Option.get(userDocumentMap.get(user), []);
+    let newTags = Buffer.Buffer<Tag>(1); 
+    newTags.add(getTagByBranch(branch));
+    let existBranches = Buffer.fromArray<Tag>(document.tags);
+    newTags.append(existBranches);
     let newDoc = {
       docId = nextId;
-      tags = document.tags;
+      tags = Buffer.toArray(newTags);
       content = document.content;
       imageLink = document.imageLink;
     };   
@@ -190,9 +201,94 @@ actor {
     let newList =  Array.append(docList, [nextId]);
     userDocumentMap.put(user, newList);
     // TODO documents.add(newDoc) on postupgrade
-
-
     return #Ok(newDoc);
   };
   
+  //Key method for update reputation based on document
+  public func updateDocHistory(user : Principal, docId : DocId, value : Nat8, comment: Text) : async Types.Result<DocHistory, Types.CommonError> {
+    let doc = switch(checkDocument(docId)) {
+      case (#Err(err)) { return #Err(err) };
+      case (#Ok(doc)) { doc; };
+    };
+    let newDocHistory : DocHistory = {
+          docId = docId;
+          timestamp = Time.now();
+          changedBy = user;
+          value = value;
+          comment = comment;
+      };
+    docHistory.put(docId, newDocHistory);
+    let branch = await getBranchByTagName(doc.tags[0]);
+    ignore await setUserReputation(user, branch, Nat8.toNat(value));
+    #Ok(newDocHistory);
+  };
+
+  func checkDocument(docId : DocId) : Types.Result<Document, Types.CommonError> {
+    let checkDocument = Array.find<Document>(documents, func doc = Nat.equal(docId, doc.docId));
+    let doc = switch(checkDocument) {
+      case null { #Err(#NotFound { message="No document found by id "; docId=docId })};
+      case (?doc) { #Ok(doc); };
+    };
+  };
+
+  public func newDocument(user : Principal, doc : DocDAO) : async Types.Result<DocId, Types.CommonError> {
+    let userDocs = userDocumentMap.get(user);
+    // TODO choose branch: chooseTag(preferBranch, doc);
+    let branch_opt = Nat.fromText(doc.tags[0]);
+    let branch = switch (branch_opt) {
+      case null return #Err(#NotFound { message= "Cannot find out the branch " # doc.tags[0]; docId = 0 } );
+      case (?br) Nat8.fromNat(br);
+    };
+    let document = await setDocumentByUser(user, branch, doc);
+    return #Err(#TemporarilyUnavailable);
+  };
+
+  public func createDocument(user : Principal, branchs : [ Nat8 ], content : Text, imageLink : Text) : async Document {
+    var tags = Buffer.Buffer<Text>(1);
+    for(item in branchs.vals()) {
+      tags.add(getTagByBranch(item));
+    };
+    let newDoc = {
+      docId = 0;
+      tags = Buffer.toArray(tags);
+      content = content;
+      imageLink = imageLink;
+    };  
+  };
+
+  // Tag part
+  public func getBranchByTagName(tag : Tag) : async Branch {
+    let res = switch (tagMap.get(tag)) {
+      case null Nat8.fromNat(0);
+      case (?br)  br;
+    };
+    res;
+  };
+
+  func getTagByBranch(branch : Branch) : Tag {
+    for((key, value) in tagMap.entries()) {
+      if (Nat8.equal(branch, value)) return key;
+    };
+    "0";
+  };
+
+  public func setNewTag(tag : Tag) : async Types.Result<(Tag, Branch), (Tag, Branch)> {
+    switch (tagMap.get(tag)) {
+      case null { 
+        // TODO Create a hierarchical system of industries
+        let newBranch = tagMap.size();
+        tagMap.put(tag, Nat8.fromNat(newBranch));
+        #Ok(tag, Nat8.fromNat(newBranch));
+      };
+      case (?br) #Err(tag, br);
+    }
+  };
+
+  public func getTags() : async [ (Tag, Branch) ] {
+    let res = Buffer.Buffer<(Tag, Branch)>(1);
+    for((key, value) in tagMap.entries()) {
+      res.add(key, value);
+    };
+    Buffer.toArray(res);
+  };
 }
