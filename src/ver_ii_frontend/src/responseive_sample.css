@@ -1,0 +1,47 @@
+/* Base styles for Desktops */
+
+body, html {
+    margin: 0;
+    padding: 0;
+    font-size: 16px;
+}
+
+header, footer {
+    padding: 20px;
+}
+
+main {
+    padding: 40px;
+}
+
+/* Tablet styles */
+@media (max-width: 1024px) and (min-width: 768px) {
+    
+    body, html {
+        font-size: 14px;
+    }
+
+    header, footer {
+        padding: 15px;
+    }
+
+    main {
+        padding: 30px;
+    }
+}
+
+/* Mobile styles */
+@media (max-width: 768px) {
+    
+    body, html {
+        font-size: 12px;
+    }
+
+    header, footer {
+        padding: 10px;
+    }
+
+    main {
+        padding: 20px;
+    }
+}

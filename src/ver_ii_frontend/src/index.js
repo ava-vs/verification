@@ -20,6 +20,23 @@ greetButton.onclick = async (e) => {
     return false;
 };
 
+const balanceButton = document.getElementById("getBalanceButton");
+balanceButton.onclick = async (e) => {
+    e.preventDefault();
+    const principalName = document.getElementById("name");
+
+    balanceButton.setAttribute("disabled", true);
+
+    // Interact with backend actor, calling the greet method
+    const getBalance = await actor.getBalance(principalName);
+
+    balanceButton.removeAttribute("disabled");
+
+    document.getElementById("balanceResult").innerText = getBalance;
+
+    return false;
+};
+
 const loginButton = document.getElementById("login");
 loginButton.onclick = async (e) => {
     e.preventDefault();

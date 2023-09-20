@@ -21,6 +21,40 @@
         <button id="greet">Click Me!</button>
       </form>
       <section id="greeting"></section>
+
+      <br />  
+      <form action="#">
+        <label for="all">All users with balances:</label>        
+        <button id="getAllUsers" type="button">Get all users</button>
+      </form>  
+      <table id="usersTable">
+        <thead>
+            <tr>
+                <th>User</th>
+                <th>Reputation</th>
+            </tr>
+        </thead>
+        <tbody id="usersTableBody">         
+        </tbody>
+    </table>
+    <div id="errorOutput"></div>
+      
+      <br />  
+      <br />  
+      <form action="#">
+        <label for="name">Enter user id: </label>
+        <input id="name" placeholder="User ID" type="text" />
+        <button id="getBalanceButton" type="button">Get balance</button>
+      </form>
+      <div id="balanceResult"></div>
+      <br />  
+      <br />  
+      <form action="#">
+        <label for="user">Enter user id: </label>
+        <input id="user" placeholder="User ID" type="text" />
+        <button id="increaseRepoButton" type="button">Increase Reputation</button>
+      </form>
+      <div id="increaseResult"></div>
     </main>
   </body>
 </html>

@@ -1,7 +1,28 @@
 {
   "canisters": {
     "ver_ii_backend": {
+      "dependencies": [
+        "rep"
+      ],
       "main": "src/ver_ii_backend/main.mo",
+      "type": "motoko"
+    },
+    "rep": {
+      "dependencies": [
+        "rep_token"
+      ],
+      "main": "src/reputation/Reputation.mo",
+      "type": "motoko"
+    },
+    "rep_token": {
+      "dependencies": [
+        "ledger"
+      ],
+      "main": "src/reputation/ReputationToken.mo",
+      "type": "motoko"
+    },
+    "ledger": {
+      "main": "src/reputation/Ledger.mo",
       "type": "motoko"
     },
     "ver_ii_frontend": {
@@ -33,7 +54,7 @@
   "defaults": {
     "build": {
       "args": "",
-      "packtool": ""
+      "packtool": "mops sources"
     }
   },
   "version": 1
