@@ -109,7 +109,7 @@ actor {
 
   // doctoken part
 
-  public func minDocToken(to: Principal, author: Text, description : Text, hashsum : Text, link: Text) : async Types.MintReceipt {
+  public func mintDocToken(to: Principal, author: Text, description : Text, hashsum : Text, link: Text) : async Types.MintReceipt {
     let doc = actor(doctoken_local) : actor { mintNFT: (Principal, Text, Text, Text, Text) -> async Types.MintReceipt };
     return await doc.mintNFT(to, author, description, hashsum, link);
   };
@@ -121,17 +121,17 @@ actor {
 
    public func getDocumentsByTag(tag: Text) : async [Document] {
     // Implement logic to fetch documents by tag
-    return [];  // Placeholder
+    return [];  
   };
   
   public func deleteDocument(user: Principal, docId: Nat8) : async Bool {
     // Implement logic to delete document if it belongs to the given user
-    return false;  // Placeholder
+    return false;  
   };
   
   public func updateDocument(user: Principal, docId: Nat8, newContent: Text) : async ?Document {
     // Implement logic to update document content
-    return null;  // Placeholder
+    return null;  
   };
    
 
@@ -139,13 +139,23 @@ actor {
 
   public func getDocumentHistory(docId: Nat8) : async [DocumentHistory] {
     // Implement logic to fetch all document history
-    return [];  // Placeholder
+    return [];  
   };
 
   public func getDocumentHistoryByUser(docId: Nat8, user: Principal) : async [DocumentHistory] {
     // Implement logic to fetch document history made by a specific user
-    return [];  // Placeholder
+    return [];  
   };
   
+  public func updateDocHistory(user : Principal, docId : rep.DocId, value : Nat8, comment: Text) : async Types.Result<rep.DocHistory, rep.CommonError> {
+     await rep.updateDocHistory(user, docId, value, comment);
+  };
 
+  public func createDocument(user : Principal, branches : [ Nat8 ], content : Text, imageLink : Text) : async Document {
+    await rep.createDocument(user, branches, content, imageLink);
+  };
+
+  public func getTags() : async [ (rep.Tag, Branch) ] {
+    await rep.getTags();
+  };
 };

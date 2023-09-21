@@ -1,26 +1,51 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="initial-scale=1, width=device-width" />
+
+    <link type="text/css" rel="stylesheet" href="main.css" />
+    <link type="text/css" rel="stylesheet" href="new_card.css">
+    <img id="hidden" src="image_rep.svg" style="display:none;">  
     <title>aVa Verification (II version)</title>
     <base href="/" />
     <link rel="icon" href="favicon.ico" />
-    <link type="text/css" rel="stylesheet" href="main.css" />
+    <link type="font/ttf" href="Goldman-Regular.ttf" rel="stylesheet">
+    <style>
+      @font-face {
+        font-family: 'Golden-Regular';
+        src: url('./assets/Goldman-Regular.ttf') format('truetype');
+      }
+      body, h1, p {
+        font-family: '/assets/Goldman-Regular.ttf', Arial, sans-serif;
+      }
+    </style>
   </head>
-  <body>
+  <body style="background-image: url('back.webp'); background-size: cover;">
+    <header>
+      <div id="header-logo">
+      <a href="http://ava.capetown/en" target="_blank"><img alt="Logo" id="logo" src="logo.png"/></a>
+      <div class="avaname">
+      <div class="ava">aVa</div>
+      <div class="verification">Verification</div>
+      </div>
+      </div>
+      <div id="menu">
+      <!-- <div class="nft-button">
+      <a href="http://127.0.0.1:8000/?canisterId=be2us-64aaa-aaaaa-qaabq-cai&amp;id=bkyz2-fmaaa-aaaaa-qaaaq-cai" target="_blank">
+      <button class="button" id="nftlink">NFTs</button></a>
+      </div> -->
+      <div class="nft-button"><a href="dnft.html"><button class="button" id="nftlink">dNFT</button></a></div>
+      <div class="nft-button"><a href="doctoken.html"><button class="button" id="doctoken">DocToken</button></a></div></div>
+      </header>
     <main>
-      <img src="logo.png" alt="aVa logo" />
+      <!-- <img src="logo.png" alt="aVa logo" />
       <br />
-      <br />
+      <br /> -->
       <form>
         <button id="login">Login!</button>
       </form>
       <br />
-      <form>
-        <button id="greet">Click Me!</button>
-      </form>
-      <section id="greeting"></section>
 
       <br />  
       <form action="#">
@@ -55,6 +80,7 @@
         <button id="increaseRepoButton" type="button">Increase Reputation</button>
       </form>
       <div id="increaseResult"></div>
+      <div id="setReputationResult"></div>
     </main>
   </body>
 </html>

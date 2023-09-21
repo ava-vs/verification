@@ -21,10 +21,10 @@ dfx deploy --argument '(record { initial_mints =
         decimals = 6; 
         transfer_fee = 0 })' ledger
 
-echo "Getting init balance branch 0: "
+echo "Getting init balance of branch 0: "
 dfx canister call rep_token userBalanceByBranch '(principal "ao6hk-x5zgr-aa6y2-zq5ei-meewq-doeim-hwbws-zzxql-rjtcc-hmabt-xqe", 0)'
 
-echo "Getting init balance branch 1: "
+echo "Getting init balance of branch 1: "
 
 
 dfx canister call rep_token userBalanceByBranch '(principal "ao6hk-x5zgr-aa6y2-zq5ei-meewq-doeim-hwbws-zzxql-rjtcc-hmabt-xqe", 1)'
@@ -37,4 +37,9 @@ dfx canister call ledger icrc1_transfer '(
         subaccount=opt vec {0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 1}};
     amount = 1;
     })'
+
+echo "Getting new balance of branch 1: "
+
+
+dfx canister call rep_token userBalanceByBranch '(principal "ao6hk-x5zgr-aa6y2-zq5ei-meewq-doeim-hwbws-zzxql-rjtcc-hmabt-xqe", 1)'
 

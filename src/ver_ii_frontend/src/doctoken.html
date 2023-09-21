@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta charset="utf-8" />
+      <meta name="viewport" content="initial-scale=1, width=device-width" />
+      <title>aVa Doctoken</title>
+      <link rel="icon" href="logo.png" />  
+      <link type="text/css" rel="stylesheet" href="styles.css" />
+      <link type="text/css" rel="stylesheet" href="new_card.css" />
+      <style>
+        @font-face {
+          font-family: 'Golden-Regular';
+          src: url('./assets/Goldman-Regular.ttf') format('truetype');
+        }
+        body, h1, p {
+          font-family: '/assets/Goldman-Regular.ttf', Arial, sans-serif;
+        }
+      </style>
+    <script src="doctoken.js"></script>
+  </head>
+  <body style="background-image: url('back.png'); background-size: cover;">
+
+  <header>
+    <div id="header-logo">
+      <a href="http://ava.capetown/en" target="_blank" ><img id="logo" src="logo.png" alt="Logo"></a>
+      <div class="avaname">
+        <div class="ava">aVa</div>
+        <div class="verification">Doctoken</div>
+      </div>
+    </div>
+    <div id="menu">
+      <div class="nft-button">        
+        <a href="http://127.0.0.1:8000/?canisterId=be2us-64aaa-aaaaa-qaabq-cai&id=bkyz2-fmaaa-aaaaa-qaaaq-cai" target="_blank" >
+          <button class="button" id="nftlink">NFTs</button></a>
+      </div>
+    </div>
+    <style>
+        @font-face {
+          font-family: 'Golden-Regular';
+          src: url('./assets/Goldman-Regular.ttf') format('truetype');
+        }
+        body, h1, p {
+          font-family: '/assets/Goldman-Regular.ttf', Arial, sans-serif;
+        }
+      </style>
+  </header>
+
+  <div id="form-container">
+    <form id="nft-form">
+      <h1 id="form-title">Create aVa NFT</h1>
+      
+      <div class="field">
+        <label for="principal">Principal *:</label>
+        <input type="text" id="principal" name="principal" placeholder="Enter principal">
+      </div>
+      
+      <div class="field">
+        <label for="description">Description:</label>
+        <input type="text" id="description" name="description" placeholder="Short description">
+      </div>
+      
+      <div class="field">
+        <label for="image">Image:</label>
+        <input type="text" id="image" name="image" placeholder="Image link">
+      </div>
+      
+      <div class="field">
+        <label for="link">Link:</label>
+        <input type="text" id="link" name="link" placeholder="Document's url">
+      </div>
+      
+      <button type="submit">Mint NFT</button>
+    </form>
+    </div>
+    <div id="resultcontainer"></div>
+    <div class="card-container">
+        <section id="result"></section>
+    </div>
+  </body>
+</html>

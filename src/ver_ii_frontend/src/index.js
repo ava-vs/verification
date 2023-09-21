@@ -1,6 +1,6 @@
-import {createActor, ver_ii_backend} from "../../declarations/ver_ii_backend";
-import {AuthClient} from "@dfinity/auth-client"
-import {HttpAgent} from "@dfinity/agent";
+import { createActor, ver_ii_backend } from "../../declarations/ver_ii_backend";
+import { AuthClient } from "@dfinity/auth-client"
+import { HttpAgent } from "@dfinity/agent";
 
 let actor = ver_ii_backend;
 
@@ -27,7 +27,7 @@ balanceButton.onclick = async (e) => {
 
     balanceButton.setAttribute("disabled", true);
 
-    // Interact with backend actor, calling the greet method
+    // Interact with backend actor, calling the getBalance method
     const getBalance = await actor.getBalance(principalName);
 
     balanceButton.removeAttribute("disabled");
@@ -63,3 +63,60 @@ loginButton.onclick = async (e) => {
 
     return false;
 };
+
+const userReputationButton = document.getElementById("userReputation");
+userReputationButton.onclick = async (e) => {
+    e.preventDefault();
+    const principalName = document.getElementById("name");
+
+    balanceButton.setAttribute("disabled", true);
+
+    // Interact with backend actor, calling the getUserReputation method
+    const getBalance = await actor.getUserReputation(principalName);
+
+    balanceButton.removeAttribute("disabled");
+
+    document.getElementById("reputationResult").innerText = getBalance;
+
+    return false;
+};
+
+const branchReputationButton = document.getElementById("branchReputation");
+branchReputationButton.onclick = async (e) => {
+    e.preventDefault();
+    const principalName = document.getElementById("name");
+    const branch = document.getElementById("branch");
+
+    balanceButton.setAttribute("disabled", true);
+
+    // Interact with backend actor, calling the getReputationByBranch method
+    const getBalance = await actor.getReputationByBranch(principalName, branch);
+
+    balanceButton.removeAttribute("disabled");
+
+    document.getElementById("branchResult").innerText = getBalance;
+
+    return false;
+};
+
+const setReputationButton = document.getElementById("setReputation");
+setReputationButton.onclick = async (e) => {
+    e.preventDefault();
+    const principalName = document.getElementById("name");
+    const branch = document.getElementById("branch");
+    const value = document.getElementById("value");
+
+    balanceButton.setAttribute("disabled", true);
+
+    // Interact with backend actor, calling the setUserReputation method
+    const getBalance = await actor.setUserReputation(principalName, branch, value);
+
+    balanceButton.removeAttribute("disabled");
+
+    document.getElementById("setReputationResult").innerText = getBalance;
+
+    return false;
+};
+
+
+
