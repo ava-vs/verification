@@ -11,6 +11,7 @@ import Nat "mo:base/Nat";
 import Bool "mo:base/Bool";
 import Iter "mo:base/Iter";
 import Result "mo:base/Result";
+import Nat32 "mo:base/Nat32";
 import Ledger "canister:ledger";
 import Types "Types";
 
@@ -171,9 +172,21 @@ actor ReputationToken {
 // };
 
 // Subaccounts
+func beBytes(n: Nat32) : [Nat8] {
+  func byte(n: Nat32) : Nat8 {
+    Nat8.fromNat(Nat32.toNat(n & 0xff))
+  };
+  [byte(n >> 24), byte(n >> 16), byte(n >> 8), byte(n)]
+};
 
 public func createSubaccountByBranch(branch: Nat8): async Subaccount {
-  Blob.fromArray(Array.freeze<Nat8>(Array.init(32, branch : Nat8)))
+  let bytes = beBytes(Nat32.fromNat(Nat8.toNat(branch)));
+  let padding = Array.freeze(Array.init<Nat8>(28, 0 : Nat8));   
+  Blob.fromArray(Array.append(bytes, padding))
+};
+
+public func nullSubaccount() : async Subaccount {
+  Blob.fromArrayMut(Array.init(32, 0 : Nat8))
 };
 
 public func addSubaccount(user : Principal, branch : Nat8) : async Account {
@@ -181,22 +194,21 @@ public func addSubaccount(user : Principal, branch : Nat8) : async Account {
   let newAccount : Account = { owner = user; subaccount = ?sub };
 };
 
-func subaccountToNat( subaccount : ?Subaccount) : Nat {
-  var result : Nat = 0;
-  result := switch (subaccount) {
-    case null 0;
-    case (?sub) {
-      
-      for (i in sub.vals()) {
-        let byte = Nat8.toNat(i);
-        result := result * 256; // Shift left by 8 bits
-        result := result + byte; 
-      };
-    result;
-    };
+func getBranchFromSubaccount(subaccount: ?Subaccount): Nat8 {
+  let sub = switch (subaccount) {
+    case null return 0;
+    case (?sub) sub;
   };
-  result;
+  let bytes = Blob.toArray(sub);
+  let b0 = Nat32.fromNat(Nat8.toNat(bytes[0]));
+  let b1 = Nat32.fromNat(Nat8.toNat(bytes[1]));
+  let b2 = Nat32.fromNat(Nat8.toNat(bytes[2]));
+  let b3 = Nat32.fromNat(Nat8.toNat(bytes[3]));
+
+  let n = (b0 << 24) + (b1 << 16) + (b2 << 8) + b3;
+  Nat8.fromNat(Nat32.toNat(n))
 };
+
 
 func subaccountToNatArray(subaccount : Subaccount) : [ Nat8 ] {
   var buffer = Buffer.Buffer<Nat8>(0);
@@ -295,13 +307,13 @@ func subaccountToNatArray(subaccount : Subaccount) : [ Nat8 ] {
       amount : Ledger.Tokens
       ) : async Result<TxIndex, Types.TransferBurnError> {
       // check requester's balance
-      let branch = subaccountToNat(requester.subaccount);
-      let balance_requester = await userBalanceByBranch(requester.owner, Nat8.fromNat(branch));
+      let branch = getBranchFromSubaccount(requester.subaccount);
+      let balance_requester = await userBalanceByBranch(requester.owner, branch);
       // check from balance
-      let branch_author = subaccountToNat(from.subaccount);
-      if (not Nat.equal(branch, branch_author)) return #Err(#WrongBranch { current_branch = Nat8.fromNat(branch); target_branch = Nat8.fromNat(branch_author) });
-      let balance_author = await userBalanceByBranch(from.owner, Nat8.fromNat(branch));
-      if (balance_requester < balance_author) return #Err(#InsufficientReputation { current_branch = Nat8.fromNat(branch); balance = balance_author });
+      let branch_author = getBranchFromSubaccount(from.subaccount);
+      if (not Nat8.equal(branch, branch_author)) return #Err(#WrongBranch { current_branch = branch; target_branch = branch_author });
+      let balance_author = await userBalanceByBranch(from.owner, branch);
+      if (balance_requester < balance_author) return #Err(#InsufficientReputation { current_branch = branch; balance = balance_author });
       // check document's tags for equity to requester's subaccount
       // let checkTag = Array.find<Types.Tag>(tags, func x = (x == branch));
       

@@ -141,6 +141,10 @@ actor {
     // Implement logic to fetch all document history
     return [];  
   };
+  
+  public func getDocumentsByUser(user : Principal) : async [ Document ] {
+    await rep.getDocumentsByUser(user);
+  };
 
   public func getDocumentHistoryByUser(docId: Nat8, user: Principal) : async [DocumentHistory] {
     // Implement logic to fetch document history made by a specific user

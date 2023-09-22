@@ -4,22 +4,6 @@ import { HttpAgent } from "@dfinity/agent";
 
 let actor = ver_ii_backend;
 
-const greetButton = document.getElementById("greet");
-greetButton.onclick = async (e) => {
-    e.preventDefault();
-
-    greetButton.setAttribute("disabled", true);
-
-    // Interact with backend actor, calling the greet method
-    const greeting = await actor.greet();
-
-    greetButton.removeAttribute("disabled");
-
-    document.getElementById("greeting").innerText = greeting;
-
-    return false;
-};
-
 const balanceButton = document.getElementById("getBalanceButton");
 balanceButton.onclick = async (e) => {
     e.preventDefault();
@@ -67,14 +51,14 @@ loginButton.onclick = async (e) => {
 const userReputationButton = document.getElementById("userReputation");
 userReputationButton.onclick = async (e) => {
     e.preventDefault();
-    const principalName = document.getElementById("name");
+    const principalName = document.getElementById("user");
 
-    balanceButton.setAttribute("disabled", true);
+    userReputationButton.setAttribute("disabled", true);
 
     // Interact with backend actor, calling the getUserReputation method
     const getBalance = await actor.getUserReputation(principalName);
 
-    balanceButton.removeAttribute("disabled");
+    userReputationButton.removeAttribute("disabled");updateDocHistory
 
     document.getElementById("reputationResult").innerText = getBalance;
 
@@ -87,36 +71,72 @@ branchReputationButton.onclick = async (e) => {
     const principalName = document.getElementById("name");
     const branch = document.getElementById("branch");
 
-    balanceButton.setAttribute("disabled", true);
+    branchReputationButton.setAttribute("disabled", true);
 
     // Interact with backend actor, calling the getReputationByBranch method
     const getBalance = await actor.getReputationByBranch(principalName, branch);
 
-    balanceButton.removeAttribute("disabled");
+    branchReputationButton.removeAttribute("disabled");
 
     document.getElementById("branchResult").innerText = getBalance;
 
     return false;
 };
 
-const setReputationButton = document.getElementById("setReputation");
-setReputationButton.onclick = async (e) => {
+const updateDocHistoryButton = document.getElementById("updateDocHistory");
+updateDocHistoryButton.onclick = async (e) => {
     e.preventDefault();
     const principalName = document.getElementById("name");
-    const branch = document.getElementById("branch");
+    const docId = document.getElementById("docid");
     const value = document.getElementById("value");
+    const comment = document.getElementById("comment");
 
-    balanceButton.setAttribute("disabled", true);
+
+    updateDocHistoryButton.setAttribute("disabled", true);
 
     // Interact with backend actor, calling the setUserReputation method
-    const getBalance = await actor.setUserReputation(principalName, branch, value);
+    const docHistory = await actor.updateDocHistory(principalName, docId, value, comment);
 
-    balanceButton.removeAttribute("disabled");
+    updateDocHistoryButton.removeAttribute("disabled");
 
-    document.getElementById("setReputationResult").innerText = getBalance;
+    document.getElementById("updateDocHistoryResult").innerText = docHistory;
 
     return false;
 };
 
+const getDocumentsByUserButton = document.getElementById("getDocumentsByUser");
+getDocumentsByUserButton.onclick = async (e) => {
+    e.preventDefault();
+    const principalName = document.getElementById("username");
 
+    getDocumentsByUserButton.setAttribute("disabled", true);
 
+    // Interact with backend actor, calling the setUserReputation method
+    const docList = await actor.getDocumentsByUser(principalName);
+
+    getDocumentsByUserButton.removeAttribute("disabled");
+    const usersTableBody = document.getElementById("usersTableBody");
+    usersTableBody.innerHTML = "";
+    for (let doc of docList) {
+        const row = document.createElement("tr");
+        const docCell = document.createElement("td");
+        const contentCell = document.createElement("td");
+        const imageLinkCell = document.createElement("td");
+        const tagCell = document.createElement("td");
+
+        imageLinkCell.textContent = doc.imageLink;
+        docCell.textContent = doc.docId; 
+        contentCell.textContent = doc.content; 
+        tagCell.textContent = doc.tags; 
+
+        row.appendChild(docCell);
+        row.appendChild(imageLinkCell);
+        row.appendChild(contentCell);
+        row.appendChild(tagCell);
+        usersTableBody.appendChild(row);
+      };
+
+    // document.getElementById("documentsByUserResult").innerText = docList;
+
+    return false;
+};

@@ -24,22 +24,24 @@ dfx deploy --argument '(record { initial_mints =
 echo "Getting init balance of branch 0: "
 dfx canister call rep_token userBalanceByBranch '(principal "ao6hk-x5zgr-aa6y2-zq5ei-meewq-doeim-hwbws-zzxql-rjtcc-hmabt-xqe", 0)'
 
-echo "Getting init balance of branch 1: "
+dfx canister call rep setNewTag '( "Shared Reputation" )'
+dfx canister call rep setNewTag '( "Incenitive Reputation" )'
+dfx canister call rep setNewTag '( "IT" )'
+
+echo "Getting init balance of branch 2: "
 
 
-dfx canister call rep_token userBalanceByBranch '(principal "ao6hk-x5zgr-aa6y2-zq5ei-meewq-doeim-hwbws-zzxql-rjtcc-hmabt-xqe", 1)'
+dfx canister call rep getReputationByBranch '(principal "ao6hk-x5zgr-aa6y2-zq5ei-meewq-doeim-hwbws-zzxql-rjtcc-hmabt-xqe", 2)'
 echo "Trasfer:"
 
-dfx canister call ledger icrc1_transfer '(
-    record {
-     to = record { 
-        owner=principal "ao6hk-x5zgr-aa6y2-zq5ei-meewq-doeim-hwbws-zzxql-rjtcc-hmabt-xqe";
-        subaccount=opt vec {0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 1}};
-    amount = 1;
-    })'
+dfx canister call rep setUserReputation '(
+    principal "ao6hk-x5zgr-aa6y2-zq5ei-meewq-doeim-hwbws-zzxql-rjtcc-hmabt-xqe",
+    2,
+    5
+    )'
 
-echo "Getting new balance of branch 1: "
+echo "Getting new balance of branch 2: "
 
 
-dfx canister call rep_token userBalanceByBranch '(principal "ao6hk-x5zgr-aa6y2-zq5ei-meewq-doeim-hwbws-zzxql-rjtcc-hmabt-xqe", 1)'
+dfx canister call rep getReputationByBranch '(principal "ao6hk-x5zgr-aa6y2-zq5ei-meewq-doeim-hwbws-zzxql-rjtcc-hmabt-xqe", 2)'
 

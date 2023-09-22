@@ -38,3 +38,10 @@
 #         2
 # )'
 # dfx canister call rep_token userBalanceByBranch '(principal "ao6hk-x5zgr-aa6y2-zq5ei-meewq-doeim-hwbws-zzxql-rjtcc-hmabt-xqe", 1)'
+dfx canister call rep setUserReputation '(
+    principal "ao6hk-x5zgr-aa6y2-zq5ei-meewq-doeim-hwbws-zzxql-rjtcc-hmabt-xqe",
+    2,
+    5
+    )'
+
+dfx canister call rep_token createSubaccountByBranch '(2)'
