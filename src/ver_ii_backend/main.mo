@@ -4,6 +4,7 @@ import doctoken "canister:doctoken";
 
 import Option "mo:base/Option";
 import Principal "mo:base/Principal";
+import Nat8 "mo:base/Nat8";
 
 import Types "./Types";
 
@@ -74,29 +75,37 @@ actor {
 
   // dNFT part
 
-  public func mintNFT(to: Principal, link: Text) : async dnft.MintReceipt {
+  public func mintdNFT(to: Principal, link: Text) : async dnft.MintReceipt {
     await dnft.mintNFTWithLink(to, link);
   };
 
-  public func getAllNft() : async [dnft.Nft] {
+  public func getAlldNft() : async [dnft.Nft] {
     await dnft.getAllNft();
   };
 
   // doctoken part
 
-  public func mintDocToken(to: Principal, author: Text, description : Text, hashsum : Text, link: Text) : async doctoken.MintReceipt {
-    await doctoken.mintNFT(to, author, description, hashsum, link);
+  public func mintDocToken(to: Principal, author: Text, content : Text, link: Text, tag : Nat8) : async doctoken.MintReceipt {
+    let res = await doctoken.mintNFT(to, author, content, Nat8.toText(tag), link);
+    let docDao : rep.DocDAO = {
+      tags = [ Nat8.toText(tag) ];
+      content = content;
+      imageLink = link;
+    };    
+    let setDocToReputation = await rep.setDocumentByUser(to, tag, docDao);
+    res;
   };
+  
 
   public func getAllDocTokens() : async [doctoken.Nft] {
     let nfts = await doctoken.getAllNft();    
   };
 
-  public func getDocsByUser(user : Principal) : async [doctoken.Nft] {
+  public func getDocTokensByUser(user : Principal) : async [doctoken.Nft] {
     let nfts = await doctoken.getDocsByUser(user);
   };
 
-  public func getDocById(id : Nat64) : async Types.Result<doctoken.Nft, Text> {
+  public func getDocTokenById(id : Nat64) : async Types.Result<doctoken.Nft, Text> {
     let resp = await doctoken.getDocById(id);   
   };
 
@@ -123,7 +132,7 @@ actor {
   //   return [];  
   // };
   
-  public func getDocumentsByUser(user : Principal) : async [ Document ] {
+  public func getDocumentsFromRepByUser(user : Principal) : async [ Document ] {
     await rep.getDocumentsByUser(user);
   };
 
@@ -136,7 +145,7 @@ actor {
      await rep.updateDocHistory(user, docId, value, comment);
   };
 
-  public func createDocument(user : Principal, branches : [ Nat8 ], content : Text, imageLink : Text) : async Document {
+  public func createRepDocument(user : Principal, branches : [ Nat8 ], content : Text, imageLink : Text) : async Document {
     await rep.createDocument(user, branches, content, imageLink);
   };
 

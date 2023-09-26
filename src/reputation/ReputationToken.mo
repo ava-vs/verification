@@ -18,7 +18,7 @@ import Time "mo:base/Time";
 import Types "Types";
 
 actor ReputationToken {
-    let main_principal = Principal.fromText("ao6hk-x5zgr-aa6y2-zq5ei-meewq-doeim-hwbws-zzxql-rjtcc-hmabt-xqe");
+    let main_principal = Principal.fromText("36m6a-jxboo-zbvze-io5r2-gc64j-dcjoy-bovog-5dqvl-p66rb-ck3un-uqe");
     
     // null subaccount will be use as shared token wallet
     // 1 subaccount is incenitive subaccount
