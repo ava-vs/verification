@@ -1,14 +1,14 @@
 import Array "mo:base/Array";
 import Blob "mo:base/Blob";
 import Buffer "mo:base/Buffer";
-import Principal "mo:base/Principal";
-import Option "mo:base/Option";
 import Error "mo:base/Error";
-import Time "mo:base/Time";
 import Int "mo:base/Int";
-import Nat8 "mo:base/Nat8";
 import Nat64 "mo:base/Nat64";
-// import Transfer "mo:icrc1/ICRC1/Transfer";
+import Nat8 "mo:base/Nat8";
+import Option "mo:base/Option";
+import Principal "mo:base/Principal";
+import Time "mo:base/Time";
+
 import T "Types";
 
 actor class Ledger(init : { initial_mints : [{ account : { owner : Principal; subaccount : ?Blob }; amount : Nat }]; minting_account : { owner : Principal; subaccount : ?Blob }; token_name : Text; token_symbol : Text; decimals : Nat8; transfer_fee : Nat }) = this {

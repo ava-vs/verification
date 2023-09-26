@@ -1,21 +1,23 @@
-import Principal "mo:base/Principal";
-import Int "mo:base/Int";
-import Text "mo:base/Text";
-import Nat "mo:base/Nat";
+import RToken "canister:rep_token";
+
 import Array "mo:base/Array";
-import TrieMap "mo:base/TrieMap";
-import Map "mo:base/HashMap";
-import Iter "mo:base/Iter";
-import HashMap "mo:base/HashMap";
-import Hash "mo:base/Hash";
-import Nat8 "mo:base/Nat8";
-import Nat32 "mo:base/Nat32";
-import Option "mo:base/Option";
 import Blob "mo:base/Blob";
 import Buffer "mo:base/Buffer";
+import Hash "mo:base/Hash";
+import Map "mo:base/HashMap";
+import HashMap "mo:base/HashMap";
+import Int "mo:base/Int";
+import Iter "mo:base/Iter";
+import Nat "mo:base/Nat";
+import Nat32 "mo:base/Nat32";
+import Nat8 "mo:base/Nat8";
+import Option "mo:base/Option";
+import Principal "mo:base/Principal";
+import Text "mo:base/Text";
 import Time "mo:base/Time";
+import TrieMap "mo:base/TrieMap";
+
 import Types "./Types";
-import RToken "canister:rep_token";
 
 actor {
   type Document = Types.Document;

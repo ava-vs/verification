@@ -1,18 +1,20 @@
-import Nat8 "mo:base/Nat8";
-import Nat64 "mo:base/Nat64";
-import Principal "mo:base/Principal";
-import Time "mo:base/Time";
-import Blob "mo:base/Blob";
-import Buffer "mo:base/Buffer";
+import Ledger "canister:ledger";
+
 import Array "mo:base/Array";
+import Blob "mo:base/Blob";
+import Bool "mo:base/Bool";
+import Buffer "mo:base/Buffer";
 import Error "mo:base/Error";
 import Int "mo:base/Int";
-import Nat "mo:base/Nat";
-import Bool "mo:base/Bool";
 import Iter "mo:base/Iter";
-import Result "mo:base/Result";
+import Nat "mo:base/Nat";
 import Nat32 "mo:base/Nat32";
-import Ledger "canister:ledger";
+import Nat64 "mo:base/Nat64";
+import Nat8 "mo:base/Nat8";
+import Principal "mo:base/Principal";
+import Result "mo:base/Result";
+import Time "mo:base/Time";
+
 import Types "Types";
 
 actor ReputationToken {
@@ -84,92 +86,6 @@ actor ReputationToken {
 
   public type Result<T, E> = { #Ok : T; #Err : E };
 
-// Demo
-
-// public shared({ caller }) func demo() : async Text {
-//   var res = "Start. \n";
-//   let accWithsub = await addSubaccount(caller, 0);
-//   let sub : ?Types.Subaccount = accWithsub.subaccount;
-//   let subText : Text = switch (sub) {
-//     case null "null";
-//     case (?s) {
-//       var t : Text = "";
-//       for (item in s.vals()) {
-//         t := t # Nat8.toText(item) # " ";
-//       };
-//       t;
-//     };
-//   };
-//   res := res # " owner: " # Principal.toText(accWithsub.owner) # " ; subaccount: " # subText # " \n";
-//   let minting_acc : ?Ledger.Account = await Ledger.icrc1_minting_account();
-//   let to : Account = accWithsub;
-//   let null_acc : Ledger.Account = { owner = Principal.fromText("aaaaa-aa"); subaccount = null}; 
-//   var m_sub : Types.Subaccount= [];
-//   let m_acc = switch (minting_acc) {
-//     case null null_acc;
-//     case (?acc) { 
-//       m_sub := switch (acc.subaccount) {
-//         case null [];
-//         case (?sub) sub;
-//       };
-//         acc;
-//     };
-//   };
-//   var m_sub_text = "";
-//   for(s in m_sub.vals()) {
-//     m_sub_text := m_sub_text # Nat8.toText(s);
-//   };
-//   res := res # "From: owner: " # Principal.toText(m_acc.owner) # ", subacc: " # m_sub_text;
-//   let respose = await Ledger.icrc2_transfer_from({
-//       from = m_acc;
-//       to = to;
-//       amount = 1;
-//       fee = null;
-//       memo = null;
-//       created_at_time = null;     
-//     });
-//   let res_transfer : Text = switch (respose) {
-//     case (#Ok(id)) " Success. Transaction id " # Nat.toText(id);
-//     case (#Err(err)) {
-//       var error_msg = switch (err) {
-//         case (#BadBurn {min_burn_amount}) {
-//           "BadBurn with minimum burn amount: " # Nat.toText(min_burn_amount)
-//         };
-//         case (#BadFee {expected_fee}) {
-//           "BadFee with expected fee: " # Nat.toText(expected_fee)
-//         };
-//         case (#CreatedInFuture {ledger_time}) {
-//           "CreatedInFuture with ledger time: " # Nat64.toText(ledger_time)
-//         };
-//         case (#Duplicate {duplicate_of}) {
-//           "Duplicate of transaction index: " # Nat.toText(duplicate_of)
-//         };
-//         case (#GenericError {error_code; message}) {
-//           "GenericError with code: " # Nat.toText(error_code) # ", message: " # message
-//         };
-//         case (#InsufficientFunds {balance}) {
-//           "InsufficientFunds with balance: " # Nat.toText(balance)
-//         };
-//         case (#InsufficientAllowance {allowance:Nat}) {
-//           "InsufficientAllowance: " # Nat.toText(allowance);
-//         };
-//         case (#TemporarilyUnavailable) {
-//           "TemporarilyUnavailable"
-//         };
-//         case (#TooOld) {
-//           "TooOld"
-//         };
-//       };
-//       error_msg;
-//     };
-//   };
-//   res := res # " Result of transfer to subaccount: " # res_transfer;
-
-//   let new_balance = await Ledger.icrc1_balance_of(to);
-//   res := res # ". New balance = " # Nat.toText(new_balance);
-
-//   return res;
-// };
 
 // Subaccounts
 func beBytes(n: Nat32) : [Nat8] {
@@ -219,8 +135,6 @@ func subaccountToNatArray(subaccount : Subaccount) : [ Nat8 ] {
 };
 
 // Logic part
-
-  // public shared ({ caller }) func getSupply() : async Tokens { await Ledger.icrc1_total_supply();};
 
   public func getMintingAccount() : async Principal  { 
     let acc = await Ledger.icrc1_minting_account();
@@ -299,6 +213,7 @@ func subaccountToNatArray(subaccount : Subaccount) : [ Nat8 ] {
     });
   };
 
+    // TODO 
     public func askForBurn(
       requester : Account, 
       from : Account, 
@@ -314,12 +229,12 @@ func subaccountToNatArray(subaccount : Subaccount) : [ Nat8 ] {
       if (not Nat8.equal(branch, branch_author)) return #Err(#WrongBranch { current_branch = branch; target_branch = branch_author });
       let balance_author = await userBalanceByBranch(from.owner, branch);
       if (balance_requester < balance_author) return #Err(#InsufficientReputation { current_branch = branch; balance = balance_author });
-      // check document's tags for equity to requester's subaccount
+      // TODO check document's tags for equity to requester's subaccount
       // let checkTag = Array.find<Types.Tag>(tags, func x = (x == branch));
       
-      // burn requester's token
-      // burn from token
-      // create history log
+      // TODO burn requester's token
+      // TODO burn from token
+      // TODO create history log
 
       return #Err(#TemporarilyUnavailable);
     };
