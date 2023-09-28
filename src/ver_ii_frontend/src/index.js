@@ -20,19 +20,57 @@ greetButton.onclick = async (e) => {
     return false;
 };
 
-const balanceButton = document.getElementById("getBalanceButton");
-balanceButton.onclick = async (e) => {
+const docsButton = document.getElementById("docs");
+docsButton.onclick = async (e) => {
     e.preventDefault();
-    const principalName = document.getElementById("name");
+    // const principalName = document.getElementById("name");
 
-    balanceButton.setAttribute("disabled", true);
+    docsButton.setAttribute("disabled", true);
 
-    // Interact with backend actor, calling the greet method
-    const getBalance = await actor.getBalance(principalName);
+    try {
+        const docTokens = await ver_ii_backend.getAllDocTokens();
 
-    balanceButton.removeAttribute("disabled");
+        const tableBody = document.getElementById('resultDocuments');
+        tableBody.innerHTML = '';  // Clear the current content
 
-    document.getElementById("balanceResult").innerText = getBalance;
+        docTokens.forEach(token => {
+            const row = tableBody.insertRow();
+
+            // № column
+            const numberCell = row.insertCell(0);
+            numberCell.textContent = token.id;
+
+            // Title column
+            const titleCell = row.insertCell(1);
+            titleCell.textContent = "document #";
+
+            // Category column
+            const categoryCell = row.insertCell(2);
+            categoryCell.textContent = "IT";
+
+            // Author column
+            const authorCell = row.insertCell(3);
+            authorCell.textContent = token.owner;
+
+            // Reputation column
+            const reputationCell = row.insertCell(4);
+            reputationCell.textContent = "-";
+
+            // History column
+            const historyCell = row.insertCell(5);
+            historyCell.textContent = "-";
+
+            // Date column
+            const dateCell = row.insertCell(6);
+            dateCell.textContent = "-";
+        });
+    } catch (error) {
+        console.error("Error loading documents:", error);
+    };
+
+    docsButton.removeAttribute("disabled");
+
+    // document.getElementById("resultDocuments").innerText = getDocs;
 
     return false;
 };
@@ -63,3 +101,30 @@ loginButton.onclick = async (e) => {
 
     return false;
 };
+
+// Assuming you have a way to call the canister's methods, e.g., using the DFINITY agent
+async function loadDocuments() {
+    // try {
+    //     const docTokens = await ver_ii_backend.getAllDocTokens();
+
+    //     const tableBody = document.getElementById('resultDocuments');
+    //     tableBody.innerHTML = '';  // Clear the current content
+
+    //     docTokens.forEach(token => {
+    //         token.metadata.forEach(part => {
+    //             part.key_val_data.forEach(kv => {
+    //                 if (kv.val.LinkContent) {
+    //                     const row = tableBody.insertRow();
+    //                     const cell = row.insertCell(0);
+    //                     cell.textContent = kv.val.LinkContent;
+    //                 }
+    //             });
+    //         });
+    //     });
+    // } catch (error) {
+    //     console.error("Error loading documents:", error);
+    // }
+}
+
+// Call the function to load the documents when the page loads
+// window.onload = loadDocuments;
