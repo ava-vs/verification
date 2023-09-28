@@ -1,0 +1,263 @@
+
+/* Variables */
+:root {
+  --primary-color: #EE4817;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Golden-Regular', Arial, sans-serif;
+  background-image: url('back.webp');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+@font-face {
+  font-family: 'Golden-Regular';
+  src: url('assets/Goldman-Regular.ttf') format('truetype');
+}
+
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.8);
+  padding: 15px 30px; /* Increased padding for better spacing */
+  color: var(--primary-color);
+  max-width: 768px; 
+  margin: auto;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1); /* Adding shadow for better depth perception */
+}
+
+#header-logo {
+  display: flex;
+  align-items: center;
+}
+
+
+#logo {
+  align-items: center; 
+  width: 100px;
+  /* gap: 15px;  */
+}
+
+/* #logo img {
+  width: 50px;
+  height: 50px; 
+  margin-right: 15px; 
+} */
+
+/* .avaname {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.ava {
+  font-family: 'Golden-Regular', Arial, sans-serif;
+  font-size: 22px;
+  font-weight: bold;
+}
+
+.verification {
+  font-family: 'Golden-Regular', Arial, sans-serif;
+  font-size: 16px;
+} */
+
+#icons {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 120px;  /* Reduced width to bring icons closer to the logo */
+}
+
+
+#icons a {
+  margin: 0 10px; /* Increased spacing between icons for better separation */
+}
+
+#icons img {
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+}
+
+#header-links {
+    gap: 20px;  
+}
+
+#reaction {
+  margin-right: 2rem;
+}
+
+#menu {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+h2 {
+  font-family: 'Goldman', Arial, sans-serif;
+  font-weight: 700;
+  font-size: 24px;
+  color: var(--primary-color);
+  text-align: center;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+
+#form-container {
+  color: var(--primary-color);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 55vh;
+}
+
+#form-title {
+  text-align: center;
+}
+
+#nft-form {
+  background-color: rgba(255, 255, 255, 0.8);
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+  width: 500px;
+}
+
+@media (max-width: 510px) {
+  #nft-form {
+    width: 80%;  
+  }
+}
+
+@media (min-width: 768px) {
+  .card-container {
+    justify-content: center;  
+  }
+}
+
+.field {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+label {
+  font-weight: bold;
+  color: var(--primary-color);
+  align-items: end;
+}
+
+input[type="text"] {
+  flex-grow: 0;
+  margin-left: 20px;
+  border: 1px solid var(--primary-color);
+  color: var(--primary-color);
+  width: 300px;
+}
+
+button[type="submit"]{
+  background-color: var(--primary-color);
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 7px;
+  cursor: pointer;
+  margin: auto;
+  display: block;
+}
+
+.card-container {
+  width: auto;
+  display: flex;
+  justify-content: center;
+  margin-top: 20px; 
+  align-items: center;
+}
+
+section {
+  display: flex;
+  align-items: center;
+}
+
+#resultcontainer {
+  display: flex;
+  color: var(--primary-color);
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+}
+
+#result {
+  margin-right: 10px;
+  margin-bottom: 10px;
+}
+
+#nftlink {
+  border: none;
+  color: var(--primary-color);
+  background-color: white;
+} 
+
+::placeholder {
+  color: var(--primary-color);
+  opacity: 0.5;  
+}
+
+:-ms-input-placeholder {
+  color: var(--primary-color);
+}
+
+::-ms-input-placeholder {
+  color: var(--primary-color);
+}
+
+
+
+/* Separator styles */
+.separator {
+    display: flex;
+    justify-content: center;
+    padding: 10px 0;
+}
+
+.separator img {
+    width: 100%;
+    max-width: 768px;
+}
+
+/* Table styles */
+table {
+    width: 100%;
+    max-width: 768px;
+    margin: 20px auto;
+    border-collapse: collapse;
+    background-color: rgba(255, 255, 255, 0.8);
+
+}
+
+table th, table td {
+    padding: 10px;
+    border: 1px solid var(--primary-color);
+    text-align: center;
+}
+
+table th {
+    background-color: var(--primary-color);
+    color: #fff;
+}
+
+
+a {
+  text-decoration: none;
+  color: var(--primary-color);
+  font-family: 'Goldman', Arial, sans-serif;
+  font-size: 16px;
+}
