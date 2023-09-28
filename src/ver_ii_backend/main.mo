@@ -5,6 +5,7 @@ import doctoken "canister:doctoken";
 import Option "mo:base/Option";
 import Principal "mo:base/Principal";
 import Nat8 "mo:base/Nat8";
+import Nat "mo:base/Nat";
 
 import Types "./Types";
 
@@ -35,25 +36,8 @@ actor {
     return "Hello, " # Principal.toText(message.caller) # "!";
   };
 
-  // default IC values
-
-  let dnft_canister_id = "mmo7p-xaaaa-aaaan-qedda-cai";
-  let doctoken_canister_id = "mzjoc-wiaaa-aaaan-qedaq-cai";
-
-  // local values
-
-  let dnft_local = "bkyz2-fmaaa-aaaaa-qaaaq-cai";
-  let doctoken_local = "bkyz2-fmaaa-aaaaa-qaaaq-cai";
-
-
-  // public func changeBalance(user: Principal, val : Int) : async (Principal, Int) {
-  //   let rep = actor(rep_canister_id) : actor { incrementBalance: (Principal, Int) -> async (Principal, Int)};
-  //   return await rep.incrementBalance(user, val);
-  // };
-
   public func getUserReputation(user: Principal) : async Nat {
-    await rep.getUserReputation(user);    
-     
+    await rep.getUserReputation(user);       
   };
   
   public func getReputationByBranch(user: Principal, branch: Branch) : async (Principal, Branch, Nat) {
@@ -62,15 +46,12 @@ actor {
       case null 0;
       case (?(br, bal)) bal;
     };
-    // let ver = actor(ver_canister_id): actor { getBalance: (Text) -> async ?Int };
-    //  await ver.getBalance(user);
     
     (user, branch, balance );
   };
   
   public func setUserReputation(user: Principal, branchId: Nat8, value: Nat) : async Types.Result<(rep.Account, Nat),rep.TransferBurnError> {
       let res = await rep.setUserReputation(user, branchId, value); 
-
   };
 
   // dNFT part
@@ -85,15 +66,21 @@ actor {
 
   // doctoken part
 
-  public func mintDocToken(to: Principal, author: Text, content : Text, link: Text, tag : Nat8) : async doctoken.MintReceipt {
-    let res = await doctoken.mintNFT(to, author, content, Nat8.toText(tag), link);
+  public func createDocToken(to: Principal, author: Text, content : Text, imageLink: Text, tag : Nat8) : async Types.Result<rep.Document, Text> {
+    let res = await doctoken.mintNFT(to, author, content, Nat8.toText(tag), imageLink);
+    let linkText = switch(res) {
+      case(#Err(err)) { return #Err("Cannot create doctoken"); };
+      case(#Ok(nft)) { Nat.toText(nft.id); };
+    };
     let docDao : rep.DocDAO = {
+      //TODO check is tag present to avoid duplicates
       tags = [ Nat8.toText(tag) ];
-      content = content;
-      imageLink = link;
+      
+      // Content is doctoken id for prototype
+      content = linkText;
+      imageLink = imageLink;
     };    
-    let setDocToReputation = await rep.setDocumentByUser(to, tag, docDao);
-    res;
+    let setDocToReputation = await rep.setDocumentByUser(to, tag, docDao);    
   };
   
 
