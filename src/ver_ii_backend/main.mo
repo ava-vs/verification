@@ -9,6 +9,7 @@ import Nat64 "mo:base/Nat64";
 import Nat8 "mo:base/Nat8";
 import Option "mo:base/Option";
 import Principal "mo:base/Principal";
+import List "mo:base/List";
 
 import Types "./Types";
 
@@ -42,6 +43,13 @@ actor {
     reputation : Nat; // sum of all doc history
     history : Text; // link to history
   };
+
+  type DocNumber = {
+    doctoken : Nat64;
+    reputation : Nat;
+  };
+
+  stable var doctokenNumbers = List.nil<DocNumber>();
 
   public query (message) func user() : async Text {
     Principal.toText(message.caller);
@@ -91,7 +99,15 @@ actor {
       content = linkText;
       imageLink = imageLink;
     };    
-    let setDocToReputation = await rep.setDocumentByUser(to, tag, docDao);    
+    let setDocToReputation = await rep.setDocumentByUser(to, tag, docDao);   
+    let docReputation = switch(setDocToReputation) {
+      case (#Err(text)) return #Err(text);
+      case (#Ok(doc)) doc;
+    };
+    let doctokenNumber = Option.get(Nat.fromText(linkText), 0);
+    let docNumber : DocNumber = { doctoken = Nat64.fromNat(doctokenNumber); reputation = docReputation.docId };
+    doctokenNumbers := List.push(docNumber, doctokenNumbers);
+    setDocToReputation;
   };
   
 

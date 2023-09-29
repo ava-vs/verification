@@ -42,8 +42,8 @@ docsButton.onclick = async (e) => {
             reputationCell.textContent = "-";
 
             // History column
-            const historyCell = row.insertCell(5);
-            historyCell.textContent = "link";
+            // const historyCell = row.insertCell(5);
+            // historyCell.textContent = "link";
 
         });
     } catch (error) {
@@ -97,7 +97,6 @@ myDocsButton.onclick = async (e) => {
         const user = await ver_ii_backend.user();
         console.log(user);
         const docTokens = await ver_ii_backend.getTokenDAOByUser(Principal.fromText(user));
-        console.log(docTokens);
         const tableBody = document.getElementById('resultDocuments');
         tableBody.innerHTML = '';  // Clear the current content
 
@@ -107,7 +106,15 @@ myDocsButton.onclick = async (e) => {
 
             // № column
             const numberCell = row.insertCell(0);
-            numberCell.textContent = token.docId;
+            const numberLink = document.createElement("a");
+            numberLink.href = "#"; 
+            numberLink.textContent = token.docId;
+            numberLink.onclick = (e) => {
+                e.preventDefault(); 
+                // TODO 
+                document.getElementById("documentResult").innerHTML = ver_ii_backend.getDocTokenById(token.docId);
+            };
+            numberCell.appendChild(numberLink);
 
             // Title column
             const titleCell = row.insertCell(1);
@@ -126,14 +133,14 @@ myDocsButton.onclick = async (e) => {
             reputationCell.textContent = token.reputation;
 
             // History column
-            const historyCell = row.insertCell(5);
-            const addHistoryButton= document.createElement("button");
-            historyCell.textContent = token.history;
-            addHistoryButton.onclick = () => {
-                const res = ver_ii_backend.getDocHistory(token.docId);
-                console.log(res);
-            };
-            historyCell.appendChild(addHistoryButton);
+            // const historyCell = row.insertCell(5);
+            // const addHistoryButton= document.createElement("button");
+            // historyCell.textContent = token.history;
+            // addHistoryButton.onclick = () => {
+            //     const res = ver_ii_backend.getDocHistory(token.docId);
+            //     console.log(res);
+            // };
+            // historyCell.appendChild(addHistoryButton);
 
         });
     } catch (error) {
