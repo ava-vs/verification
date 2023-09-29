@@ -1,18 +1,18 @@
 import {createActor, ver_ii_backend} from "../../declarations/ver_ii_backend";
 import {AuthClient} from "@dfinity/auth-client"
 import {HttpAgent} from "@dfinity/agent";
+import { Principal } from "@dfinity/principal";
 
 let actor = ver_ii_backend;
 
-const docsButton = document.getElementById("docs");
+const docsButton = document.getElementById("reaction");
 docsButton.onclick = async (e) => {
     e.preventDefault();
-    // const principalName = document.getElementById("name");
 
     docsButton.setAttribute("disabled", true);
 
     try {
-        const docTokens = await ver_ii_backend.getAllDocTokens();
+        const docTokens = await ver_ii_backend.getTokenDAO();
 
         const tableBody = document.getElementById('resultDocuments');
         tableBody.innerHTML = '';  // Clear the current content
@@ -22,11 +22,11 @@ docsButton.onclick = async (e) => {
 
             // № column
             const numberCell = row.insertCell(0);
-            numberCell.textContent = token.id;
+            numberCell.textContent = token.docId;
 
             // Title column
             const titleCell = row.insertCell(1);
-            titleCell.textContent = "document #";
+            titleCell.textContent = token.image;
 
             // Category column
             const categoryCell = row.insertCell(2);
@@ -34,19 +34,17 @@ docsButton.onclick = async (e) => {
 
             // Author column
             const authorCell = row.insertCell(3);
-            authorCell.textContent = token.owner;
+            authorCell.textContent = token.author;
 
             // Reputation column
             const reputationCell = row.insertCell(4);
+            // const docRep = ver_ii_backend.getDocTokenById(token.id);
             reputationCell.textContent = "-";
 
             // History column
             const historyCell = row.insertCell(5);
-            historyCell.textContent = "-";
+            historyCell.textContent = "link";
 
-            // Date column
-            const dateCell = row.insertCell(6);
-            dateCell.textContent = "-";
         });
     } catch (error) {
         console.error("Error loading documents:", error);
@@ -82,33 +80,63 @@ loginButton.onclick = async (e) => {
     actor = createActor(process.env.VER_II_BACKEND_CANISTER_ID, {
         agent,
     });
+    const currentUser = actor.user();
+    document.getElementById("user").innerText = currentUser;
+    document.getElementById("login").style.display = "none";
 
     return false;
 };
 
-// Assuming you have a way to call the canister's methods, e.g., using the DFINITY agent
-async function loadDocuments() {
-    // try {
-    //     const docTokens = await ver_ii_backend.getAllDocTokens();
+const myDocsButton = document.getElementById("docs");
+myDocsButton.onclick = async (e) => {
+    e.preventDefault();
 
-    //     const tableBody = document.getElementById('resultDocuments');
-    //     tableBody.innerHTML = '';  // Clear the current content
+    myDocsButton.setAttribute("disabled", true);
 
-    //     docTokens.forEach(token => {
-    //         token.metadata.forEach(part => {
-    //             part.key_val_data.forEach(kv => {
-    //                 if (kv.val.LinkContent) {
-    //                     const row = tableBody.insertRow();
-    //                     const cell = row.insertCell(0);
-    //                     cell.textContent = kv.val.LinkContent;
-    //                 }
-    //             });
-    //         });
-    //     });
-    // } catch (error) {
-    //     console.error("Error loading documents:", error);
-    // }
-}
+    try {
+        const user = await ver_ii_backend.user();
+        console.log(user);
+        const docTokens = await ver_ii_backend.getTokenDAOByUser(Principal.fromText(user));
+        console.log(docTokens);
+        const tableBody = document.getElementById('resultDocuments');
+        tableBody.innerHTML = '';  // Clear the current content
 
-// Call the function to load the documents when the page loads
-// window.onload = loadDocuments;
+        docTokens.forEach(token => {
+            console.log(token);
+            const row = tableBody.insertRow();
+
+            // № column
+            const numberCell = row.insertCell(0);
+            numberCell.textContent = token.docId;
+
+            // Title column
+            const titleCell = row.insertCell(1);
+            titleCell.textContent = token.image;
+
+            // Category column
+            const categoryCell = row.insertCell(2);
+            categoryCell.textContent = "IT";
+
+            // Author column
+            const authorCell = row.insertCell(3);
+            authorCell.textContent = token.author;
+
+            // Reputation column
+            const reputationCell = row.insertCell(4);
+            reputationCell.textContent = token.reputation;
+
+            // History column
+            const historyCell = row.insertCell(5);
+            historyCell.textContent = token.history;
+
+        });
+    } catch (error) {
+        console.error("Error loading documents:", error);
+    };
+
+    myDocsButton.removeAttribute("disabled");
+
+    // document.getElementById("resultDocuments").innerText = getDocs;
+
+    return false;
+};

@@ -1,11 +1,13 @@
-import rep "canister:rep";
 import dnft "canister:dnft";
 import doctoken "canister:doctoken";
+import rep "canister:rep";
 
+import Buffer "mo:base/Buffer";
+import Nat "mo:base/Nat";
+import Nat64 "mo:base/Nat64";
+import Nat8 "mo:base/Nat8";
 import Option "mo:base/Option";
 import Principal "mo:base/Principal";
-import Nat8 "mo:base/Nat8";
-import Nat "mo:base/Nat";
 
 import Types "./Types";
 
@@ -32,8 +34,16 @@ actor {
     comment : Text;
   };
 
-  public query (message) func greet() : async Text {
-    return "Hello, " # Principal.toText(message.caller) # "!";
+  type DocDAO = {
+    docId : Nat;
+    image : Text; //datalink
+    author : Text; // owner
+    reputation : Nat; // sum of all doc history
+    history : Text; // link to history
+  };
+
+  public query (message) func user() : async Text {
+    Principal.toText(message.caller);
   };
 
   public func getUserReputation(user: Principal) : async Nat {
@@ -95,6 +105,48 @@ actor {
   public func getDocTokenById(id : Nat64) : async Types.Result<doctoken.Nft, Text> {
     let resp = await doctoken.getDocById(id);   
   };
+
+  public func getTokenDAO() : async [ DocDAO ] {
+    let docs = await rep.getAllDocs();
+    let res = Buffer.Buffer<DocDAO>(0);
+    for(doc in docs.vals()) {
+      let id = doc.docId;
+      let doc_response = await doctoken.getDocById(Nat64.fromNat(id));
+      let document = switch (doc_response) {
+        case (#Err(t)) return [{docId = 0; image = "test_image"; author = "test_user"; reputation=0; history= "test_link"}];
+        case (#Ok(d)) d;        
+      };
+      let docHistory = await rep.getDocHistory(id);
+      let history = "link";
+      let docDAO = {
+        docId = id;
+        image = doc.imageLink;
+        author = Principal.toText(document.owner);
+        reputation = await rep.getDocReputation(id);
+        history = history; // TODO  link to rep.getDocHistory(docId : DocId)
+
+      };
+      res.add(docDAO);
+    }; 
+    Buffer.toArray(res);
+  };
+
+  public func getTokenDAOByUser(user : Principal) : async [ DocDAO ] {
+    let repDocs = await rep.getDocumentsByUser(user);
+    let res = Buffer.Buffer<DocDAO>(0);
+    for(doc in repDocs.vals()) {
+      let docDAO = {
+        docId = doc.docId;
+        image = doc.imageLink;
+        author = Principal.toText(user);
+        reputation = await rep.getDocReputation(doc.docId);
+        history = "link"; // TODO array to text docHistory
+      };
+      res.add(docDAO);
+    };
+    Buffer.toArray(res);
+  };
+
 
   //  public func getDocumentsByTag(tag: Text) : async [Document] {
   //   // Implement logic to fetch documents by tag

@@ -43,7 +43,7 @@ actor {
   var userDocumentMap = Map.HashMap<Principal, [DocId]>(10, Principal.equal, Principal.hash);
 
   // map docId - docHistory 
-  var docHistory = Map.HashMap<DocId, DocHistory>(10, Nat.equal, Hash.hash);
+  var docHistory = Map.HashMap<DocId, [ DocHistory ]>(10, Nat.equal, Hash.hash);
   // map userId - [ Reputation ] or map userId - Map (branchId : value)
   // TODO add stable storage for reputation
   var userReputation = Map.HashMap<Principal, Map.HashMap<Branch, Nat>>(1, Principal.equal, Principal.hash);
@@ -54,17 +54,6 @@ actor {
 
   public func getUserReputation(user: Principal) : async Nat {
     let balance = await RToken.getUserBalance(user);
-    // let reputationMap = userReputation.get(user);
-    // let map = switch (reputationMap) {
-    //   case null return [];
-    //   case (?reputationMap) reputationMap;
-    // };
-    // var buffer = Buffer.Buffer<(Branch, Nat)>(1);
-    // for((br, item) in map.entries()) {
-    //   buffer.add(br, item);
-    // };
-
-    // return Buffer.toArray(buffer);
   };
 
   public func getReputationByBranch(user: Principal, branchId: Nat8) : async ?(Branch, Nat) {
@@ -156,6 +145,10 @@ actor {
 
   // Doctoken part
 
+  public func getAllDocs() : async [ Document ] {
+    documents;
+  };
+
   public func getDocumentsByUser(user : Principal) : async [ Document ] {
     let docIdList = Option.get(userDocumentMap.get(user), []);
     var result = Buffer.Buffer<Document>(1);
@@ -219,10 +212,23 @@ actor {
           value = value;
           comment = comment;
       };
-    docHistory.put(docId, newDocHistory);
+    docHistory.put(docId, Array.append(Option.get(docHistory.get(docId), []), [newDocHistory]));
     let branch = await getBranchByTagName(doc.tags[0]);
     ignore await setUserReputation(user, branch, Nat8.toNat(value));
     #Ok(newDocHistory);
+  };
+
+  public func getDocHistory(docId : DocId) : async [DocHistory] {
+     Option.get(docHistory.get(docId), []);      
+  };
+
+  public func getDocReputation(docId : DocId) : async Nat {
+    var res = 0;
+    let history = await getDocHistory(docId);
+    for(his in history.vals()) {
+      res += Nat8.toNat(his.value);
+    };
+    res;
   };
 
   func checkDocument(docId : DocId) : Types.Result<Document, Types.CommonError> {

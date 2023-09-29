@@ -11,7 +11,7 @@ body {
   background-image: url('back.webp');
   background-size: cover;
   background-position: center;
-  background-repeat: no-repeat;
+  background-repeat: repeat-y;
 }
 
 @font-face {
@@ -25,11 +25,11 @@ header {
   justify-content: space-between;
   align-items: center;
   background-color: rgba(255, 255, 255, 0.8);
-  padding: 15px 30px; /* Increased padding for better spacing */
+  padding: 15px 30px; 
   color: var(--primary-color);
   max-width: 768px; 
   margin: auto;
-  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1); /* Adding shadow for better depth perception */
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
 }
 
 #header-logo {
@@ -41,42 +41,18 @@ header {
 #logo {
   align-items: center; 
   width: 100px;
-  /* gap: 15px;  */
 }
-
-/* #logo img {
-  width: 50px;
-  height: 50px; 
-  margin-right: 15px; 
-} */
-
-/* .avaname {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.ava {
-  font-family: 'Golden-Regular', Arial, sans-serif;
-  font-size: 22px;
-  font-weight: bold;
-}
-
-.verification {
-  font-family: 'Golden-Regular', Arial, sans-serif;
-  font-size: 16px;
-} */
 
 #icons {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  width: 120px;  /* Reduced width to bring icons closer to the logo */
+  width: 120px;  
 }
 
 
 #icons a {
-  margin: 0 10px; /* Increased spacing between icons for better separation */
+  margin: 0 10px; 
 }
 
 #icons img {
