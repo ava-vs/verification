@@ -19,7 +19,6 @@ body {
   src: url('assets/Goldman-Regular.ttf') format('truetype');
 }
 
-
 header {
   display: flex;
   justify-content: space-between;
@@ -37,7 +36,6 @@ header {
   align-items: center;
 }
 
-
 #logo {
   align-items: center; 
   width: 100px;
@@ -49,7 +47,6 @@ header {
   align-items: center;
   width: 120px;  
 }
-
 
 #icons a {
   margin: 0 10px; 
@@ -66,6 +63,10 @@ header {
 }
 
 #reaction {
+  margin-right: 2rem;
+}
+
+#docs {
   margin-right: 2rem;
 }
 
@@ -236,4 +237,9 @@ a {
   color: var(--primary-color);
   font-family: 'Goldman', Arial, sans-serif;
   font-size: 16px;
+}
+
+#documentResult {
+  display: flex;
+  justify-content: center;
 }
