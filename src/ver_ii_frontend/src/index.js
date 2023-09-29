@@ -114,13 +114,6 @@ myDocsButton.onclick = async (e) => {
             const numberLink = document.createElement("a");
             numberLink.href = "#"; 
             numberLink.textContent = token.docId;
-            // numberLink.onclick = (e) => {
-            //     e.preventDefault(); 
-            //     const docRes = ver_ii_backend.getDocTokenById(token.docId).then(result => {
-            //         const res = result.Ok;
-            //         document.getElementById("documentResult").innerHTML = res.id;
-            //     });
-            // };
             numberLink.onclick = (e) => {
                 e.preventDefault(); 
                 ver_ii_backend.getDocTokenById(token.docId).then(result => {
@@ -142,6 +135,7 @@ myDocsButton.onclick = async (e) => {
                             </div>
                         `;
                     });
+                   
                     const tokenId = token.docId;
                     card.innerHTML = `
                         <div class="card-image">
@@ -152,9 +146,15 @@ myDocsButton.onclick = async (e) => {
                             <div class="card-info">
                                 ${cardInfoContent}
                             </div>
-                            <a href="http://ava.capetown/en" target="_blank"><button class="ava-button">aVa</button></a>
+                            <button class="ava-button">Increase reputation</button>
                         </div>
                     `;
+                    const avaButton = card.querySelector(".ava-button");
+        
+                    avaButton.onclick = async function() {
+                        const rep = await ver_ii_backend.updateDocHistory(Principal.fromText(user), tokenId, 1, "test_increase +1");
+                        console.log("New rep: ", rep.Ok);
+                    };
 
                     const container = document.getElementById("documentResult");
                     container.innerHTML = '';  
