@@ -80,7 +80,7 @@ loginButton.onclick = async (e) => {
     actor = createActor(process.env.VER_II_BACKEND_CANISTER_ID, {
         agent,
     });
-    const currentUser = actor.user();
+    const currentUser = await actor.user();
     document.getElementById("user").innerText = currentUser;
     document.getElementById("login").style.display = "none";
 
@@ -112,7 +112,9 @@ myDocsButton.onclick = async (e) => {
             numberLink.onclick = (e) => {
                 e.preventDefault(); 
                 // TODO 
-                document.getElementById("documentResult").innerHTML = ver_ii_backend.getDocTokenById(token.docId);
+                ver_ii_backend.getDocTokenById(token.docId).then(result => {
+                    document.getElementById("documentResult").innerHTML = result;
+                });
             };
             numberCell.appendChild(numberLink);
 
