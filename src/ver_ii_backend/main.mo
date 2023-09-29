@@ -3,6 +3,7 @@ import doctoken "canister:doctoken";
 import rep "canister:rep";
 
 import Buffer "mo:base/Buffer";
+import Int "mo:base/Int";
 import Nat "mo:base/Nat";
 import Nat64 "mo:base/Nat64";
 import Nat8 "mo:base/Nat8";
@@ -34,7 +35,7 @@ actor {
     comment : Text;
   };
 
-  type DocDAO = {
+  type DocTable = {
     docId : Nat;
     image : Text; //datalink
     author : Text; // owner
@@ -106,9 +107,9 @@ actor {
     let resp = await doctoken.getDocById(id);   
   };
 
-  public func getTokenDAO() : async [ DocDAO ] {
+  public func getTokenDAO() : async [ DocTable ] {
     let docs = await rep.getAllDocs();
-    let res = Buffer.Buffer<DocDAO>(0);
+    let res = Buffer.Buffer<DocTable>(0);
     for(doc in docs.vals()) {
       let id = doc.docId;
       let doc_response = await doctoken.getDocById(Nat64.fromNat(id));
@@ -131,9 +132,9 @@ actor {
     Buffer.toArray(res);
   };
 
-  public func getTokenDAOByUser(user : Principal) : async [ DocDAO ] {
+  public func getTokenDAOByUser(user : Principal) : async [ DocTable ] {
     let repDocs = await rep.getDocumentsByUser(user);
-    let res = Buffer.Buffer<DocDAO>(0);
+    let res = Buffer.Buffer<DocTable>(0);
     for(doc in repDocs.vals()) {
       let docDAO = {
         docId = doc.docId;
@@ -147,6 +148,15 @@ actor {
     Buffer.toArray(res);
   };
 
+  public func getDocHistory(docId : rep.DocId) : async [ DocumentHistory ] {
+    return [{ 
+              docId = docId;
+              timestamp = 1000;
+              changedBy = Principal.fromText("aaaaa-aa");
+              value = 1;
+              comment = "self_test_update"
+          }]
+  };
 
   //  public func getDocumentsByTag(tag: Text) : async [Document] {
   //   // Implement logic to fetch documents by tag

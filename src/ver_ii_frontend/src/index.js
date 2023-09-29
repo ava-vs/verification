@@ -127,7 +127,13 @@ myDocsButton.onclick = async (e) => {
 
             // History column
             const historyCell = row.insertCell(5);
+            const addHistoryButton= document.createElement("button");
             historyCell.textContent = token.history;
+            addHistoryButton.onclick = () => {
+                const res = ver_ii_backend.getDocHistory(token.docId);
+                console.log(res);
+            };
+            historyCell.appendChild(addHistoryButton);
 
         });
     } catch (error) {
