@@ -6,6 +6,15 @@ import { Principal } from "@dfinity/principal";
 let actor = ver_ii_backend;
 let user = await ver_ii_backend.user();
 
+function clearAll() {
+    // Clear the current content
+    const tableBody = document.getElementById('resultDocuments');    
+    tableBody.innerHTML = '';  
+
+    let clearCard = document.getElementById('documentResult');
+    clearCard.innerHTML = ''; 
+};
+
 const docsButton = document.getElementById("reaction");
 docsButton.onclick = async (e) => {
     e.preventDefault();
@@ -16,14 +25,24 @@ docsButton.onclick = async (e) => {
         const docTokens = await ver_ii_backend.getTokenDAO();
 
         const tableBody = document.getElementById('resultDocuments');
-        tableBody.innerHTML = '';  // Clear the current content
+        // Clear the current content
+        clearAll();
 
         docTokens.forEach(token => {
             const row = tableBody.insertRow();
 
             // № column
             const numberCell = row.insertCell(0);
-            numberCell.textContent = token.docId;
+            const numberLink = document.createElement("a");
+            numberLink.href = "#"; 
+            numberLink.textContent = token.docId;
+            numberLink.onclick = (e) => {
+                e.preventDefault(); 
+                displayDocumentCard(token.docId);
+
+            };
+            
+            numberCell.appendChild(numberLink);
 
             // Title column
             const titleCell = row.insertCell(1);
@@ -39,12 +58,8 @@ docsButton.onclick = async (e) => {
 
             // Reputation column
             const reputationCell = row.insertCell(4);
-            // const docRep = ver_ii_backend.getDocTokenById(token.id);
-            reputationCell.textContent = "-";
+            reputationCell.textContent = token.reputation;
 
-            // History column
-            // const historyCell = row.insertCell(5);
-            // historyCell.textContent = "link";
 
         });
     } catch (error) {
@@ -53,12 +68,11 @@ docsButton.onclick = async (e) => {
 
     docsButton.removeAttribute("disabled");
 
-    // document.getElementById("resultDocuments").innerText = getDocs;
-
     return false;
 };
 
 const loginButton = document.getElementById("login");
+loginButton.title = user;
 loginButton.onclick = async (e) => {
     e.preventDefault();
 
@@ -82,13 +96,15 @@ loginButton.onclick = async (e) => {
         agent,
     });
     const currentUser = await actor.user();
-    const home_icon = `<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M31 17C30.8684 17.0008 30.738 16.9755 30.6161 16.9258C30.4943 16.876 30.3835 16.8027 30.29 16.71L16 2.41001L1.71003 16.71C1.51873 16.8738 1.27265 16.9594 1.02097 16.9497C0.769298 16.94 0.530559 16.8357 0.352464 16.6576C0.17437 16.4795 0.0700372 16.2407 0.0603161 15.9891C0.0505949 15.7374 0.136201 15.4913 0.300027 15.3L15.3 0.300009C15.4874 0.113758 15.7408 0.00921631 16.005 0.00921631C16.2692 0.00921631 16.5227 0.113758 16.71 0.300009L31.71 15.3C31.8476 15.4404 31.9408 15.6182 31.9779 15.8113C32.015 16.0043 31.9944 16.204 31.9186 16.3854C31.8429 16.5668 31.7153 16.7218 31.552 16.8312C31.3886 16.9405 31.1966 16.9992 31 17Z" fill="#EE4817"/>
-    <path d="M16 5.78998L4 17.83V30C4 30.5304 4.21071 31.0391 4.58579 31.4142C4.96086 31.7893 5.46957 32 6 32H13V22H19V32H26C26.5304 32 27.0391 31.7893 27.4142 31.4142C27.7893 31.0391 28 30.5304 28 30V17.76L16 5.78998Z" fill="#EE4817"/>
-    </svg>`;
+    // const home_icon = `<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+    // <path d="M31 17C30.8684 17.0008 30.738 16.9755 30.6161 16.9258C30.4943 16.876 30.3835 16.8027 30.29 16.71L16 2.41001L1.71003 16.71C1.51873 16.8738 1.27265 16.9594 1.02097 16.9497C0.769298 16.94 0.530559 16.8357 0.352464 16.6576C0.17437 16.4795 0.0700372 16.2407 0.0603161 15.9891C0.0505949 15.7374 0.136201 15.4913 0.300027 15.3L15.3 0.300009C15.4874 0.113758 15.7408 0.00921631 16.005 0.00921631C16.2692 0.00921631 16.5227 0.113758 16.71 0.300009L31.71 15.3C31.8476 15.4404 31.9408 15.6182 31.9779 15.8113C32.015 16.0043 31.9944 16.204 31.9186 16.3854C31.8429 16.5668 31.7153 16.7218 31.552 16.8312C31.3886 16.9405 31.1966 16.9992 31 17Z" fill="#EE4817"/>
+    // <path d="M16 5.78998L4 17.83V30C4 30.5304 4.21071 31.0391 4.58579 31.4142C4.96086 31.7893 5.46957 32 6 32H13V22H19V32H26C26.5304 32 27.0391 31.7893 27.4142 31.4142C27.7893 31.0391 28 30.5304 28 30V17.76L16 5.78998Z" fill="#EE4817"/>
+    // </svg>`;
+    const user_icon =`<svg class="svg-icon" style="width: 2em; height: 2em;vertical-align: middle;fill: currentColor;overflow: hidden;" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg"><path d="M843.282963 870.115556c-8.438519-140.515556-104.296296-257.422222-233.908148-297.14963C687.881481 536.272593 742.4 456.533333 742.4 364.088889c0-127.241481-103.158519-230.4-230.4-230.4S281.6 236.847407 281.6 364.088889c0 92.444444 54.518519 172.183704 133.12 208.877037-129.611852 39.727407-225.46963 156.634074-233.908148 297.14963-0.663704 10.903704 7.964444 20.195556 18.962963 20.195556l0 0c9.955556 0 18.299259-7.774815 18.962963-17.73037C227.745185 718.506667 355.65037 596.385185 512 596.385185s284.254815 122.121481 293.357037 276.195556c0.568889 9.955556 8.912593 17.73037 18.962963 17.73037C835.318519 890.311111 843.946667 881.019259 843.282963 870.115556zM319.525926 364.088889c0-106.287407 86.186667-192.474074 192.474074-192.474074s192.474074 86.186667 192.474074 192.474074c0 106.287407-86.186667 192.474074-192.474074 192.474074S319.525926 470.376296 319.525926 364.088889z" fill="#EE4817" /></svg>`;
     user = currentUser;
     console.log(currentUser);
-    document.getElementById("user").innerHTML = home_icon;
+    document.getElementById("user").innerHTML = user_icon;
+    document.getElementById("user").title = currentUser;
     document.getElementById("login").style.display = "none";
 
     return false;
@@ -131,7 +147,11 @@ async function displayDocumentCard(tokenId) {
         const avaButton = card.querySelector(".ava-button");
 
         avaButton.onclick = async function() {
+            // TODO reputation value check - access will be granted to experts with reputaion >=5 only
             const rep = await ver_ii_backend.updateDocHistory(Principal.fromText(user), tokenId, 1, "test_increase +1");
+            let new_rep = token.reputation + rep.Ok.value;
+            // alert("New rep: ", new_rep);
+            avaButton.textContent = "Reputation increased! New rep: " + new_rep;
             console.log("New rep: ", rep.Ok);
         };
 
@@ -154,9 +174,7 @@ myDocsButton.onclick = async (e) => {
         console.log(user);
         const docTokens = await ver_ii_backend.getTokenDAOByUser(Principal.fromText(user));
         const tableBody = document.getElementById('resultDocuments');
-        tableBody.innerHTML = ''; 
-        let clearCard = document.getElementById('documentResult');
-        clearCard.innerHTML = ''; 
+        clearAll();
 
         docTokens.forEach(token => {
             console.log(token);
@@ -170,51 +188,7 @@ myDocsButton.onclick = async (e) => {
             numberLink.onclick = (e) => {
                 e.preventDefault(); 
                 displayDocumentCard(token.docId);
-                // ver_ii_backend.getDocTokenById(token.docId).then(result => {
-                //     console.log("Result = ", result);
-                //     const res = result.Ok;
-                    
-                //     const card = document.createElement('div');
-                //     card.classList.add('card');
-                    
-                //     const imageview = "image_rep.svg";  
 
-                //     let cardInfoContent = '';
-                //     res.metadata[0].key_val_data.forEach(item => {
-                //         const value = item.val.LinkContent || item.val.TextContent || item.val.IntContent || 'N/A';
-                //         cardInfoContent += `
-                //             <div class="info-item">
-                //                 <span class="info-label">${item.key}:</span>
-                //                 <span class="info-value">${value}</span>
-                //             </div>
-                //         `;
-                //     });
-                   
-                //     const tokenId = token.docId;
-                //     card.innerHTML = `
-                //         <div class="card-image">
-                //             <img src=${imageview} alt="img"> 
-                //         </div>
-                //         <div class="card-content">
-                //             <h1 class="card-title">Doctoken # ${tokenId}</h1>
-                //             <div class="card-info">
-                //                 ${cardInfoContent}
-                //             </div>
-                //             <button class="ava-button">Increase reputation</button>
-                //         </div>
-                //     `;
-                //     const avaButton = card.querySelector(".ava-button");
-        
-                //     avaButton.onclick = async function() {
-                //         const rep = await ver_ii_backend.updateDocHistory(Principal.fromText(user), tokenId, 1, "test_increase +1");
-                //         console.log("New rep: ", rep.Ok);
-                //     };
-
-                //     const container = document.getElementById("documentResult");
-                //     container.innerHTML = '';  
-                //     container.appendChild(card);
-                    
-                // });
             };
             
             numberCell.appendChild(numberLink);
@@ -244,3 +218,112 @@ myDocsButton.onclick = async (e) => {
 
     return false;
 };
+
+document.getElementById("s").addEventListener("click", handleReputationClick);
+
+function handleReputationClick() {
+    // Clear the table content
+    document.getElementById("table-title").innerHTML = "";
+    document.getElementById("table").innerHTML = "";
+
+    // Create new content
+    const container = document.createElement('div');
+    container.innerHTML = `
+        <div id="form-container">
+            <form id="nft-form">
+                <h2 id="form-title">Create aVa Doctoken</h1>
+               
+                <div class="field">
+                    <label for="content">Content:</label>
+                    <input type="text" id="content" name="content" placeholder="Short content">
+                </div>
+                
+                <div class="field">
+                    <label for="image">Image:</label>
+                    <input type="text" id="image" name="image" placeholder="Image link">
+                </div>
+                
+                <div class="field">
+                    <label for="branch">Branch*:</label>
+                    <input type="number" id="branch" name="branch" placeholder="Branch Number">
+                </div>
+                
+                <button type="submit">Create Doctoken</button>
+            </form>
+        </div>
+        <div class="card-container">
+            <section id="result"></section>
+        </div>
+    `;
+
+    document.getElementById("documentResult").appendChild(container);
+
+    // Add the form event listener
+    document.querySelector("form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const button = e.target.querySelector("button");
+
+        const author = user; //document.getElementById("principal").value.toString();
+        const content = document.getElementById("content").value.toString();
+        const image = document.getElementById("image").value.toString();
+        const branch = document.getElementById("branch").value;
+
+        // Set default values from placeholders if fields are empty
+        if (content === "") {
+            content.value = "New Doctoken (aVa Doctoken )";
+        }
+        if (image === "") {
+            image.value = "image_rep.svg";
+        }
+
+        button.setAttribute("disabled", true);
+
+        // Interact with the Dip721NFT actor, calling the mintNFT method
+        const response = await ver_ii_backend.createDocToken(Principal.fromText(author), author, content, image,  branch);
+        console.log(response);
+        button.removeAttribute("disabled");
+
+        // After minting, display results in card
+        const resultcontainer = document.createElement('div');
+        resultcontainer.classList.add('resultcontainer');
+        
+        // document.getElementById("resultcontainer").innerText = `Your aVa Doctoken: \n\n`;
+
+        const card = document.createElement('div');
+        console.log("Response card container created");
+        card.classList.add('card');
+        console.log(response.imageLink);
+        card.innerHTML = `
+            <div class="card-image">
+                <img src=${response.imageLink} alt="image"> 
+            </div>
+            <div class="card-content">
+                <h1 class="card-title">Doctoken # ${response.docId}</h1>
+                <div class="card-info">
+                    <div class="info-item">
+                        <span class="info-label">Owner:</span>
+                        <span class="info-value">${user}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Tags:</span>
+                        <span class="info-value">${response.tags}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Content:</span>
+                        <span class="info-value">${response.content}</span> 
+                    </div>
+                   
+                    <div class="info-item">
+                        <span class="info-label">Link:</span>
+                        <span class="info-value" id="dip-link">${response.imageLink}</span>
+                    </div>
+                </div>
+                <a href="http://ava.capetown/en" target="_blank"><button class="ava-button">aVa</button></a>
+            </div>
+        `;
+        console.log("Response card formed");
+
+        document.getElementById('resultCard').appendChild(card);
+        return false;
+    });
+}
