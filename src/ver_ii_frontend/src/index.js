@@ -94,6 +94,56 @@ loginButton.onclick = async (e) => {
     return false;
 };
 
+async function displayDocumentCard(tokenId) {
+    try {
+        const result = await ver_ii_backend.getDocTokenById(tokenId);
+        console.log("Result = ", result);
+        const res = result.Ok;
+
+        const card = document.createElement('div');
+        card.classList.add('card');
+
+        const imageview = "image_rep.svg";  
+
+        let cardInfoContent = '';
+        res.metadata[0].key_val_data.forEach(item => {
+            const value = item.val.LinkContent || item.val.TextContent || item.val.IntContent || 'N/A';
+            cardInfoContent += `
+                <div class="info-item">
+                    <span class="info-label">${item.key}:</span>
+                    <span class="info-value">${value}</span>
+                </div>
+            `;
+        });
+
+        card.innerHTML = `
+            <div class="card-image">
+                <img src=${imageview} alt="img"> 
+            </div>
+            <div class="card-content">
+                <h1 class="card-title">Doctoken # ${tokenId}</h1>
+                <div class="card-info">
+                    ${cardInfoContent}
+                </div>
+                <button class="ava-button">Increase reputation</button>
+            </div>
+        `;
+        const avaButton = card.querySelector(".ava-button");
+
+        avaButton.onclick = async function() {
+            const rep = await ver_ii_backend.updateDocHistory(Principal.fromText(user), tokenId, 1, "test_increase +1");
+            console.log("New rep: ", rep.Ok);
+        };
+
+        const container = document.getElementById("documentResult");
+        container.innerHTML = '';  
+        container.appendChild(card);
+
+    } catch (error) {
+        console.error("Error displaying document card:", error);
+    }
+};
+
 const myDocsButton = document.getElementById("docs");
 myDocsButton.onclick = async (e) => {
     e.preventDefault();
@@ -119,51 +169,52 @@ myDocsButton.onclick = async (e) => {
             numberLink.textContent = token.docId;
             numberLink.onclick = (e) => {
                 e.preventDefault(); 
-                ver_ii_backend.getDocTokenById(token.docId).then(result => {
-                    console.log("Result = ", result);
-                    const res = result.Ok;
+                displayDocumentCard(token.docId);
+                // ver_ii_backend.getDocTokenById(token.docId).then(result => {
+                //     console.log("Result = ", result);
+                //     const res = result.Ok;
                     
-                    const card = document.createElement('div');
-                    card.classList.add('card');
+                //     const card = document.createElement('div');
+                //     card.classList.add('card');
                     
-                    const imageview = "image_rep.svg";  
+                //     const imageview = "image_rep.svg";  
 
-                    let cardInfoContent = '';
-                    res.metadata[0].key_val_data.forEach(item => {
-                        const value = item.val.LinkContent || item.val.TextContent || item.val.IntContent || 'N/A';
-                        cardInfoContent += `
-                            <div class="info-item">
-                                <span class="info-label">${item.key}:</span>
-                                <span class="info-value">${value}</span>
-                            </div>
-                        `;
-                    });
+                //     let cardInfoContent = '';
+                //     res.metadata[0].key_val_data.forEach(item => {
+                //         const value = item.val.LinkContent || item.val.TextContent || item.val.IntContent || 'N/A';
+                //         cardInfoContent += `
+                //             <div class="info-item">
+                //                 <span class="info-label">${item.key}:</span>
+                //                 <span class="info-value">${value}</span>
+                //             </div>
+                //         `;
+                //     });
                    
-                    const tokenId = token.docId;
-                    card.innerHTML = `
-                        <div class="card-image">
-                            <img src=${imageview} alt="img"> 
-                        </div>
-                        <div class="card-content">
-                            <h1 class="card-title">Doctoken # ${tokenId}</h1>
-                            <div class="card-info">
-                                ${cardInfoContent}
-                            </div>
-                            <button class="ava-button">Increase reputation</button>
-                        </div>
-                    `;
-                    const avaButton = card.querySelector(".ava-button");
+                //     const tokenId = token.docId;
+                //     card.innerHTML = `
+                //         <div class="card-image">
+                //             <img src=${imageview} alt="img"> 
+                //         </div>
+                //         <div class="card-content">
+                //             <h1 class="card-title">Doctoken # ${tokenId}</h1>
+                //             <div class="card-info">
+                //                 ${cardInfoContent}
+                //             </div>
+                //             <button class="ava-button">Increase reputation</button>
+                //         </div>
+                //     `;
+                //     const avaButton = card.querySelector(".ava-button");
         
-                    avaButton.onclick = async function() {
-                        const rep = await ver_ii_backend.updateDocHistory(Principal.fromText(user), tokenId, 1, "test_increase +1");
-                        console.log("New rep: ", rep.Ok);
-                    };
+                //     avaButton.onclick = async function() {
+                //         const rep = await ver_ii_backend.updateDocHistory(Principal.fromText(user), tokenId, 1, "test_increase +1");
+                //         console.log("New rep: ", rep.Ok);
+                //     };
 
-                    const container = document.getElementById("documentResult");
-                    container.innerHTML = '';  
-                    container.appendChild(card);
+                //     const container = document.getElementById("documentResult");
+                //     container.innerHTML = '';  
+                //     container.appendChild(card);
                     
-                });
+                // });
             };
             
             numberCell.appendChild(numberLink);
