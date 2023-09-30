@@ -4,6 +4,7 @@ import {HttpAgent} from "@dfinity/agent";
 import { Principal } from "@dfinity/principal";
 
 let actor = ver_ii_backend;
+let user = await ver_ii_backend.user();
 
 const docsButton = document.getElementById("reaction");
 docsButton.onclick = async (e) => {
@@ -85,6 +86,7 @@ loginButton.onclick = async (e) => {
     <path d="M31 17C30.8684 17.0008 30.738 16.9755 30.6161 16.9258C30.4943 16.876 30.3835 16.8027 30.29 16.71L16 2.41001L1.71003 16.71C1.51873 16.8738 1.27265 16.9594 1.02097 16.9497C0.769298 16.94 0.530559 16.8357 0.352464 16.6576C0.17437 16.4795 0.0700372 16.2407 0.0603161 15.9891C0.0505949 15.7374 0.136201 15.4913 0.300027 15.3L15.3 0.300009C15.4874 0.113758 15.7408 0.00921631 16.005 0.00921631C16.2692 0.00921631 16.5227 0.113758 16.71 0.300009L31.71 15.3C31.8476 15.4404 31.9408 15.6182 31.9779 15.8113C32.015 16.0043 31.9944 16.204 31.9186 16.3854C31.8429 16.5668 31.7153 16.7218 31.552 16.8312C31.3886 16.9405 31.1966 16.9992 31 17Z" fill="#EE4817"/>
     <path d="M16 5.78998L4 17.83V30C4 30.5304 4.21071 31.0391 4.58579 31.4142C4.96086 31.7893 5.46957 32 6 32H13V22H19V32H26C26.5304 32 27.0391 31.7893 27.4142 31.4142C27.7893 31.0391 28 30.5304 28 30V17.76L16 5.78998Z" fill="#EE4817"/>
     </svg>`;
+    user = currentUser;
     console.log(currentUser);
     document.getElementById("user").innerHTML = home_icon;
     document.getElementById("login").style.display = "none";
@@ -98,12 +100,13 @@ myDocsButton.onclick = async (e) => {
 
     myDocsButton.setAttribute("disabled", true);
 
-    try {
-        const user = await ver_ii_backend.user();
+    try {       
         console.log(user);
         const docTokens = await ver_ii_backend.getTokenDAOByUser(Principal.fromText(user));
         const tableBody = document.getElementById('resultDocuments');
-        tableBody.innerHTML = '';  
+        tableBody.innerHTML = ''; 
+        let clearCard = document.getElementById('documentResult');
+        clearCard.innerHTML = ''; 
 
         docTokens.forEach(token => {
             console.log(token);
@@ -181,14 +184,12 @@ myDocsButton.onclick = async (e) => {
             const reputationCell = row.insertCell(4);
             reputationCell.textContent = token.reputation;
 
-
         });
     } catch (error) {
         console.error("Error loading documents:", error);
     };
 
     myDocsButton.removeAttribute("disabled");
-
 
     return false;
 };
