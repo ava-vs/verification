@@ -85,21 +85,23 @@ actor {
 
   // doctoken part
 
-  public func createDocToken(to: Principal, author: Text, content : Text, imageLink: Text, tag : Nat8) : async Types.Result<rep.Document, Text> {
-    let res = await doctoken.mintNFT(to, author, content, Nat8.toText(tag), imageLink);
+  public func createDocToken(to: Principal, author: Text, content : Text, imageLink: Text, tag : Text) : async Types.Result<rep.Document, Text> {
+
+    let res = await doctoken.mintNFT(to, author, content, tag, imageLink);
     let linkText = switch(res) {
       case(#Err(err)) { return #Err("Cannot create doctoken"); };
       case(#Ok(nft)) { Nat.toText(nft.id); };
     };
     let docDao : rep.DocDAO = {
       //TODO check is tag present to avoid duplicates
-      tags = [ Nat8.toText(tag) ];
+      tags = [ tag ];
       
       // Content is doctoken id for prototype
       content = linkText;
       imageLink = imageLink;
-    };    
-    let setDocToReputation = await rep.setDocumentByUser(to, tag, docDao);   
+    };  
+    let tagNat8 = Nat8.fromNat(Option.get(Nat.fromText(tag), 2));
+    let setDocToReputation = await rep.setDocumentByUser(to, tagNat8, docDao);   
     let docReputation = switch(setDocToReputation) {
       case (#Err(text)) return #Err(text);
       case (#Ok(doc)) doc;
@@ -210,7 +212,8 @@ actor {
      await rep.updateDocHistory(user, docId, value, comment);
   };
 
-  public func createRepDocument(user : Principal, branches : [ Nat8 ], content : Text, imageLink : Text) : async Document {
+  public func createRepDocument(user : Principal, branch : Text, content : Text, imageLink : Text) : async Document {
+    let branches = [ Nat8.fromNat(Option.get(Nat.fromText(branch), 2))];
     await rep.createDocument(user, branches, content, imageLink);
   };
 
