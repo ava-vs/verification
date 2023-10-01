@@ -1,0 +1,17 @@
+{
+  "ledger": {
+    "ic": "oeuak-faaaa-aaaan-qedpa-cai"
+  },
+  "rep": {
+    "ic": "lyp2p-oiaaa-aaaan-qedqq-cai"
+  },
+  "rep_token": {
+    "ic": "odvg6-iyaaa-aaaan-qedpq-cai"
+  },
+  "ver_ii_backend": {
+    "ic": "lrmrt-yaaaa-aaaan-qedra-cai"
+  },
+  "ver_ii_frontend": {
+    "ic": "ksayv-myaaa-aaaan-qedxq-cai"
+  }
+}

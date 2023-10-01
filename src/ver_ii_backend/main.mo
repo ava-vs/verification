@@ -1,7 +1,17 @@
-import Principal "mo:base/Principal";
-import Option "mo:base/Option";
-import Types "./Types";
+import dnft "canister:dnft";
+import doctoken "canister:doctoken";
 import rep "canister:rep";
+
+import Buffer "mo:base/Buffer";
+import Int "mo:base/Int";
+import Nat "mo:base/Nat";
+import Nat64 "mo:base/Nat64";
+import Nat8 "mo:base/Nat8";
+import Option "mo:base/Option";
+import Principal "mo:base/Principal";
+import List "mo:base/List";
+
+import Types "./Types";
 
 /*
   Controller for aVa project
@@ -26,56 +36,27 @@ actor {
     comment : Text;
   };
 
-  public query (message) func greet() : async Text {
-    return "Hello, " # Principal.toText(message.caller) # "!";
+  type DocTable = {
+    docId : Nat;
+    image : Text; //datalink
+    author : Text; // owner
+    reputation : Nat; // sum of all doc history
+    history : Text; // link to history
   };
 
-  // default IC values
+  type DocNumber = {
+    doctoken : Nat64;
+    reputation : Nat;
+  };
 
-  let ver_canister_id = "4rouu-2iaaa-aaaal-qcahq-cai";//TODO  change to actual
-  let rep_canister_id = "4wpsa-xqaaa-aaaal-qcaha-cai";//TODO  change to actual
+  stable var doctokenNumbers = List.nil<DocNumber>();
 
-  // local values
-
-  let dnft_local = "bkyz2-fmaaa-aaaaa-qaaaq-cai";
-  let doctoken_local = "bkyz2-fmaaa-aaaaa-qaaaq-cai";
-
-  // verification part 
-
-  // public func getBalance(user : Principal, branch : Branch) : async (Principal, Branch, Nat) {
-  //   let balance_opt = await rep.getReputationByBranch(user : Principal, branch : Nat8);
-  //   let balance = switch (balance_opt) {
-  //     case null 0;
-  //     case (?(br, bal)) bal;
-  //   };
-  //   // let ver = actor(ver_canister_id): actor { getBalance: (Text) -> async ?Int };
-  //   //  await ver.getBalance(user);
-    
-  //   (user, branch, balance );
-  // };
-
-  //TODO uploadLink() 
-
-  // reputation part
-
-  // public func getUsers() : async [(Principal, Int)] {
-  //   let rep = actor(rep_canister_id) : actor { getUsers: () -> async [(Principal, Int)]};
-  //   return await rep.getUsers();
-  // };
-
-  // public func addUser(user: Principal) : async (Text, Int) {
-  //   let rep = actor(rep_canister_id) : actor { publish: (Int, Text) -> async (Text, Int)};
-  //   return await rep.publish(0, Principal.toText(user));
-  // };
-
-  // public func changeBalance(user: Principal, val : Int) : async (Principal, Int) {
-  //   let rep = actor(rep_canister_id) : actor { incrementBalance: (Principal, Int) -> async (Principal, Int)};
-  //   return await rep.incrementBalance(user, val);
-  // };
+  public query (message) func user() : async Text {
+    Principal.toText(message.caller);
+  };
 
   public func getUserReputation(user: Principal) : async Nat {
-    await rep.getUserReputation(user);    
-     
+    await rep.getUserReputation(user);       
   };
   
   public func getReputationByBranch(user: Principal, branch: Branch) : async (Principal, Branch, Nat) {
@@ -84,68 +65,159 @@ actor {
       case null 0;
       case (?(br, bal)) bal;
     };
-    // let ver = actor(ver_canister_id): actor { getBalance: (Text) -> async ?Int };
-    //  await ver.getBalance(user);
     
     (user, branch, balance );
   };
   
   public func setUserReputation(user: Principal, branchId: Nat8, value: Nat) : async Types.Result<(rep.Account, Nat),rep.TransferBurnError> {
       let res = await rep.setUserReputation(user, branchId, value); 
-
   };
 
   // dNFT part
 
-  public func mintNFT(to: Principal, author: Text, description : Text, hashsum : Text, link: Text) : async Types.MintReceipt {
-    let dNFT = actor(dnft_local) : actor { mintNFT: (Principal, Text, Text, Text, Text) -> async Types.MintReceipt };
-    return await dNFT.mintNFT(to, author, description, hashsum, link);
+  public func mintdNFT(to: Principal, link: Text) : async dnft.MintReceipt {
+    await dnft.mintNFTWithLink(to, link);
   };
 
-  public func getAllNft() : async [Types.Nft] {
-    let dNFT = actor(dnft_local) : actor { getAllNft : () -> async [Types.Nft] };
-    return await dNFT.getAllNft();
+  public func getAlldNft() : async [dnft.Nft] {
+    await dnft.getAllNft();
   };
 
   // doctoken part
 
-  public func minDocToken(to: Principal, author: Text, description : Text, hashsum : Text, link: Text) : async Types.MintReceipt {
-    let doc = actor(doctoken_local) : actor { mintNFT: (Principal, Text, Text, Text, Text) -> async Types.MintReceipt };
-    return await doc.mintNFT(to, author, description, hashsum, link);
-  };
+  public func createDocToken(to: Principal, author: Text, content : Text, imageLink: Text, tag : Text) : async Types.Result<rep.Document, Text> {
 
-  public func getAllDocTokens() : async [Types.Nft] {
-    let doc = actor(doctoken_local) : actor { getAllNft : () -> async [Types.Nft] };
-    return await doc.getAllNft();
-  };
-
-   public func getDocumentsByTag(tag: Text) : async [Document] {
-    // Implement logic to fetch documents by tag
-    return [];  // Placeholder
+    let res = await doctoken.mintNFT(to, author, content, tag, imageLink);
+    let linkText = switch(res) {
+      case(#Err(err)) { return #Err("Cannot create doctoken"); };
+      case(#Ok(nft)) { Nat.toText(nft.id); };
+    };
+    let docDao : rep.DocDAO = {
+      //TODO check is tag present to avoid duplicates
+      tags = [ tag ];
+      
+      // Content is doctoken id for prototype
+      content = linkText;
+      imageLink = imageLink;
+    };  
+    let tagNat8 = Nat8.fromNat(Option.get(Nat.fromText(tag), 2));
+    let setDocToReputation = await rep.setDocumentByUser(to, tagNat8, docDao);   
+    let docReputation = switch(setDocToReputation) {
+      case (#Err(text)) return #Err(text);
+      case (#Ok(doc)) doc;
+    };
+    let doctokenNumber = Option.get(Nat.fromText(linkText), 0);
+    let docNumber : DocNumber = { doctoken = Nat64.fromNat(doctokenNumber); reputation = docReputation.docId };
+    doctokenNumbers := List.push(docNumber, doctokenNumbers);
+    setDocToReputation;
   };
   
-  public func deleteDocument(user: Principal, docId: Nat8) : async Bool {
-    // Implement logic to delete document if it belongs to the given user
-    return false;  // Placeholder
+
+  public func getAllDocTokens() : async [doctoken.Nft] {
+    let nfts = await doctoken.getAllNft();    
   };
+
+  public func getDocTokensByUser(user : Principal) : async [doctoken.Nft] {
+    let nfts = await doctoken.getDocsByUser(user);
+  };
+
+  public func getDocTokenById(id : Nat64) : async Types.Result<doctoken.Nft, Text> {
+    let resp = await doctoken.getDocById(id);   
+  };
+
+  public func getTokenDAO() : async [ DocTable ] {
+    let docs = await rep.getAllDocs();
+    let res = Buffer.Buffer<DocTable>(0);
+    for(doc in docs.vals()) {
+      let id = doc.docId;
+      let doc_response = await doctoken.getDocById(Nat64.fromNat(id));
+      let document = switch (doc_response) {
+        case (#Err(t)) return [{docId = 0; image = "test_image"; author = "test_user"; reputation=0; history= "test_link"}];
+        case (#Ok(d)) d;        
+      };
+      let docHistory = await rep.getDocHistory(id);
+      let history = "link";
+      let docDAO = {
+        docId = id;
+        image = doc.imageLink;
+        author = Principal.toText(document.owner);
+        reputation = await rep.getDocReputation(id);
+        history = history; // TODO  link to rep.getDocHistory(docId : DocId)
+
+      };
+      res.add(docDAO);
+    }; 
+    Buffer.toArray(res);
+  };
+
+  public func getTokenDAOByUser(user : Principal) : async [ DocTable ] {
+    let repDocs = await rep.getDocumentsByUser(user);
+    let res = Buffer.Buffer<DocTable>(0);
+    for(doc in repDocs.vals()) {
+      let docDAO = {
+        docId = doc.docId;
+        image = doc.imageLink;
+        author = Principal.toText(user);
+        reputation = await rep.getDocReputation(doc.docId);
+        history = "link"; // TODO array to text docHistory
+      };
+      res.add(docDAO);
+    };
+    Buffer.toArray(res);
+  };
+
+  public func getDocHistory(docId : rep.DocId) : async [ DocumentHistory ] {
+    return [{ 
+              docId = docId;
+              timestamp = 1000;
+              changedBy = Principal.fromText("aaaaa-aa");
+              value = 1;
+              comment = "self_test_update"
+          }]
+  };
+
+  //  public func getDocumentsByTag(tag: Text) : async [Document] {
+  //   // Implement logic to fetch documents by tag
+  //   return [];  
+  // };
   
-  public func updateDocument(user: Principal, docId: Nat8, newContent: Text) : async ?Document {
-    // Implement logic to update document content
-    return null;  // Placeholder
-  };
+  // public func deleteDocument(user: Principal, docId: Nat8) : async Bool {
+  //   // Implement logic to delete document if it belongs to the given user
+  //   return false;  
+  // };
+  
+  // public func updateDocument(user: Principal, docId: Nat8, newContent: Text) : async ?Document {
+  //   // Implement logic to update document content
+  //   return null;  
+  // };
    
 
   // Methods for working with document history:
 
-  public func getDocumentHistory(docId: Nat8) : async [DocumentHistory] {
-    // Implement logic to fetch all document history
-    return [];  // Placeholder
-  };
-
-  public func getDocumentHistoryByUser(docId: Nat8, user: Principal) : async [DocumentHistory] {
-    // Implement logic to fetch document history made by a specific user
-    return [];  // Placeholder
-  };
+  // public func getDocumentHistory(docId: Nat8) : async [DocumentHistory] {
+  //   // Implement logic to fetch all document history
+  //   return [];  
+  // };
   
+  public func getDocumentsFromRepByUser(user : Principal) : async [ Document ] {
+    await rep.getDocumentsByUser(user);
+  };
 
+  // public func getDocumentHistoryByUser(docId: Nat8, user: Principal) : async [DocumentHistory] {
+  //   // Implement logic to fetch document history made by a specific user
+  //   return [];  
+  // };
+  
+  public func updateDocHistory(user : Principal, docId : rep.DocId, value : Nat8, comment: Text) : async Types.Result<rep.DocHistory, rep.CommonError> {
+     await rep.updateDocHistory(user, docId, value, comment);
+  };
+
+  public func createRepDocument(user : Principal, branch : Text, content : Text, imageLink : Text) : async Document {
+    let branches = [ Nat8.fromNat(Option.get(Nat.fromText(branch), 2))];
+    await rep.createDocument(user, branches, content, imageLink);
+  };
+
+  public func getTags() : async [ (rep.Tag, Branch) ] {
+    await rep.getTags();
+  };
 };

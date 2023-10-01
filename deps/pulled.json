@@ -1,0 +1,18 @@
+{
+  "canisters": {
+    "mzjoc-wiaaa-aaaan-qedaq-cai": {
+      "name": "doctoken",
+      "wasm_hash": "0545a9ff2015bb7c2633353438ebcc93f0d1bb1e6f0d281dcd7904b844fbeb61",
+      "init_guide": "aVa doctoken prototype.",
+      "candid_args": "(principal)",
+      "gzip": false
+    },
+    "mmo7p-xaaaa-aaaan-qedda-cai": {
+      "name": "dnft",
+      "wasm_hash": "248493ab8347046059f485ed16bfdd9134ca6b8747b40242c176037c39a7c637",
+      "init_guide": "aVa dNFT prototype. Type any url for creating dNFT with it",
+      "candid_args": "(principal)",
+      "gzip": false
+    }
+  }
+}

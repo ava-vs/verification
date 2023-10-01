@@ -1,0 +1,12 @@
+{
+  "canisters": {
+    "mzjoc-wiaaa-aaaan-qedaq-cai": {
+      "arg_str": "(principal\"36m6a-jxboo-zbvze-io5r2-gc64j-dcjoy-bovog-5dqvl-p66rb-ck3un-uqe\")",
+      "arg_raw": "4449444c000168011de173b21ae4887763a30bdc48c497602eab8dd1c2ab7fbd10895ba36902"
+    },
+    "mmo7p-xaaaa-aaaan-qedda-cai": {
+      "arg_str": "(principal\"36m6a-jxboo-zbvze-io5r2-gc64j-dcjoy-bovog-5dqvl-p66rb-ck3un-uqe\")",
+      "arg_raw": "4449444c000168011de173b21ae4887763a30bdc48c497602eab8dd1c2ab7fbd10895ba36902"
+    }
+  }
+}

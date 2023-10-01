@@ -1,60 +1,68 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width" />
-    <title>aVa Verification (II version)</title>
-    <base href="/" />
-    <link rel="icon" href="favicon.ico" />
-    <link type="text/css" rel="stylesheet" href="main.css" />
-  </head>
-  <body>
-    <main>
-      <img src="logo.png" alt="aVa logo" />
-      <br />
-      <br />
-      <form>
-        <button id="login">Login!</button>
-      </form>
-      <br />
-      <form>
-        <button id="greet">Click Me!</button>
-      </form>
-      <section id="greeting"></section>
 
-      <br />  
-      <form action="#">
-        <label for="all">All users with balances:</label>        
-        <button id="getAllUsers" type="button">Get all users</button>
-      </form>  
-      <table id="usersTable">
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="initial-scale=1, width=device-width" />
+    <title>aVa Verification</title>
+    <link rel="icon" href="logo.png" />
+    <link type="text/css" rel="stylesheet" href="styles.css" />
+    <link type="text/css" rel="stylesheet" href="new_card.css" />
+
+    <style>
+        @font-face {
+            font-family: 'Golden-Regular';
+            src: url('./assets/Goldman-Regular.ttf') format('truetype');
+        }
+        body, h1, p {
+            font-family: 'Goldman-Regular.ttf', Arial, sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div id="header-logo">
+            <div id="logoname"><a href="https://ksayv-myaaa-aaaan-qedxq-cai.icp0.io"><img id="logo" src="logoname.svg" alt="Logo"></a></div>
+        </div>
+        <div id="icons">
+            <a href=# id="r"><img src="r.svg" alt="Reputation Icon"></a>
+            <a href=# id="s"><img src="s.svg" alt="Shared Icon"></a>
+        </div>
+        <div id="header-links">
+            <a href="" id="reaction">All documents</a>
+            <a href="" id="docs">My documents</a>  
+              
+        </div>
+        <div>
+            <a> <button id="login">Login</button></a>  
+            <div id="user"></div>      
+        </div>
+    </header>
+    <div class="separator">
+        <img src="Union.svg" alt="Separator">
+    </div>
+    <h2 id="table-title">Documents in aVa Verification</h2>
+    <table id="table">
         <thead>
             <tr>
-                <th>User</th>
+                <th>№</th>
+                <th>Image</th>
+                <th>Category</th>
+                <th>Author</th>
                 <th>Reputation</th>
             </tr>
         </thead>
-        <tbody id="usersTableBody">         
+        <tbody id="resultDocuments">
+          <tr>
+            <td>1</td>
+            <td>Default_image</td>
+            <td>IT</td>
+            <td>Ilia(default)</td>
+            <td>1.0</td>
+        </tr>
         </tbody>
     </table>
-    <div id="errorOutput"></div>
-      
-      <br />  
-      <br />  
-      <form action="#">
-        <label for="name">Enter user id: </label>
-        <input id="name" placeholder="User ID" type="text" />
-        <button id="getBalanceButton" type="button">Get balance</button>
-      </form>
-      <div id="balanceResult"></div>
-      <br />  
-      <br />  
-      <form action="#">
-        <label for="user">Enter user id: </label>
-        <input id="user" placeholder="User ID" type="text" />
-        <button id="increaseRepoButton" type="button">Increase Reputation</button>
-      </form>
-      <div id="increaseResult"></div>
-    </main>
-  </body>
+    <section id="documentResult"></section>
+    <section id="resultCard"></section>
+</body>
 </html>

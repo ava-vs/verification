@@ -1,0 +1,74 @@
+type TokenId = nat64;
+type Result = 
+ variant {
+   Err: text;
+   Ok: Nft__1;
+ };
+type Nft__1 = 
+ record {
+   id: TokenId;
+   metadata: MetadataDesc;
+   owner: principal;
+ };
+type NftResult = 
+ variant {
+   Err: ApiError;
+   Ok: Nft;
+ };
+type Nft = 
+ record {
+   id: TokenId;
+   metadata: MetadataDesc;
+   owner: principal;
+ };
+type MintReceiptPart = 
+ record {
+   id: nat;
+   image: text;
+   link: text;
+   owner: text;
+   token_id: TokenId;
+ };
+type MintReceipt = 
+ variant {
+   Err: ApiError;
+   Ok: MintReceiptPart;
+ };
+type MetadataVal = 
+ variant {
+   BlobContent: blob;
+   IntContent: int;
+   LinkContent: text;
+   Nat16Content: nat16;
+   Nat32Content: nat32;
+   Nat64Content: nat64;
+   Nat8Content: nat8;
+   NatContent: nat;
+   TextContent: text;
+ };
+type MetadataPart = record {key_val_data: vec MetadataKeyVal;};
+type MetadataKeyVal = 
+ record {
+   key: text;
+   val: MetadataVal;
+ };
+type MetadataDesc = vec MetadataPart;
+type ApiError = 
+ variant {
+   InvalidTokenId;
+   NoNFT;
+   Other;
+   Unauthorized;
+   ZeroAddress;
+ };
+service : {
+  createMetadata: (text, text, text, text) -> (vec MetadataPart);
+  createMetadataFromLink: (text) -> (vec MetadataPart);
+  getAllNft: () -> (vec Nft__1) query;
+  getDocById: (nat64) -> (Result);
+  getDocsByUser: (principal) -> (vec Nft__1) query;
+  getLastNftByUser: (principal) -> (NftResult);
+  greet: () -> (text) query;
+  mintNFT: (principal, text, text, text, text) -> (MintReceipt);
+  mintNFTWithLinkWithoutTo: (text) -> (MintReceipt);
+}

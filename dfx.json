@@ -2,10 +2,20 @@
   "canisters": {
     "ver_ii_backend": {
       "dependencies": [
-        "rep"
+        "rep",
+        "dnft",
+        "doctoken"
       ],
       "main": "src/ver_ii_backend/main.mo",
       "type": "motoko"
+    },
+    "dnft": {
+      "type": "pull",
+      "id": "mmo7p-xaaaa-aaaan-qedda-cai"
+    },
+    "doctoken": {
+      "type": "pull",
+      "id": "mzjoc-wiaaa-aaaan-qedaq-cai"
     },
     "rep": {
       "dependencies": [
@@ -54,7 +64,7 @@
   "defaults": {
     "build": {
       "args": "",
-      "packtool": "mops sources"
+      "packtool": ""
     }
   },
   "version": 1
