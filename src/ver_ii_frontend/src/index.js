@@ -113,6 +113,8 @@ loginButton.onclick = async (e) => {
     document.getElementById("user").innerHTML = user_icon;
     document.getElementById("user").title = currentUser;
     document.getElementById("login").style.display = "none";
+    const balance = await actor.getUserReputation(user);
+    console.log("Current User Reputation is ", balance);
 
     return false;
 };
@@ -157,9 +159,11 @@ async function displayDocumentCard(tokenId) {
             // TODO reputation value check - access will be granted to experts with reputaion >=5 only
             const rep = await ver_ii_backend.updateDocHistory(Principal.fromText(user), tokenId, 1, "test_increase +1");
             let new_rep = token.reputation + rep.Ok.value;
-            // alert("New rep: ", new_rep);
+            
             avaButton.textContent = "Reputation increased! New rep: " + new_rep;
             console.log("New rep: ", rep.Ok);
+            const balance = await actor.getUserReputation(user);
+            console.log("Current User Reputation is ", balance);
         };
 
         const container = document.getElementById("documentResult");
@@ -270,7 +274,7 @@ function handleReputationClick() {
         e.preventDefault();
         const button = e.target.querySelector("button");
 
-        const author = user; //document.getElementById("principal").value.toString();
+        const author = user; 
         const content = document.getElementById("content").value.toString();
         const image = document.getElementById("image").value.toString();
         const branch = document.getElementById("branch").value;
