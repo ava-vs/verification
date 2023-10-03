@@ -49,7 +49,7 @@ docsButton.onclick = async (e) => {
             numberLink.textContent = token.docId;
             numberLink.onclick = (e) => {
                 e.preventDefault(); 
-                displayDocumentCard(token.docId);
+                displayDocumentCard(token);
 
             };
             
@@ -113,15 +113,15 @@ loginButton.onclick = async (e) => {
     document.getElementById("user").innerHTML = user_icon;
     document.getElementById("user").title = currentUser;
     document.getElementById("login").style.display = "none";
-    const balance = await actor.getUserReputation(user);
+    const balance = await actor.getUserReputation(Principal.fromText(user));
     console.log("Current User Reputation is ", balance);
 
     return false;
 };
 
-async function displayDocumentCard(tokenId) {
+async function displayDocumentCard(token) {
     try {
-        const result = await ver_ii_backend.getDocTokenById(tokenId);
+        const result = await ver_ii_backend.getDocTokenById(token.docId);
         console.log("Result = ", result);
         const res = result.Ok;
 
@@ -146,7 +146,7 @@ async function displayDocumentCard(tokenId) {
                 <img src=${imageview} alt="img"> 
             </div>
             <div class="card-content">
-                <h1 class="card-title">Doctoken # ${tokenId}</h1>
+                <h1 class="card-title">Doctoken # ${token.docId}</h1>
                 <div class="card-info">
                     ${cardInfoContent}
                 </div>
@@ -157,13 +157,14 @@ async function displayDocumentCard(tokenId) {
 
         avaButton.onclick = async function() {
             // TODO reputation value check - access will be granted to experts with reputaion >=5 only
-            const rep = await ver_ii_backend.updateDocHistory(Principal.fromText(user), tokenId, 1, "test_increase +1");
-            let new_rep = token.reputation + rep.Ok.value;
-            
-            avaButton.textContent = "Reputation increased! New rep: " + new_rep;
-            console.log("New rep: ", rep.Ok);
-            const balance = await actor.getUserReputation(user);
+            const rep = await ver_ii_backend.updateDocHistory(Principal.fromText(user), token.docId, 1, "test_increase +1");
+            const balance = await actor.getUserReputation(Principal.fromText(user));
             console.log("Current User Reputation is ", balance);
+
+            let new_token_bal = await ver_ii_backend.getDocReputation(token.docId);//token.reputation + Number(rep.Ok.value.toString());
+            console.log("Current Token Reputation is ", new_token_bal);
+
+            avaButton.textContent = "Reputation increased! New rep: " + new_token_bal;
         };
 
         const container = document.getElementById("documentResult");
@@ -198,7 +199,7 @@ myDocsButton.onclick = async (e) => {
             numberLink.textContent = token.docId;
             numberLink.onclick = (e) => {
                 e.preventDefault(); 
-                displayDocumentCard(token.docId);
+                displayDocumentCard(token);
 
             };
             

@@ -166,6 +166,10 @@ actor {
     Buffer.toArray(res);
   };
 
+  public func getDocReputation(docId : Nat) : async Nat {
+    await rep.getDocReputation(docId);
+  };
+
   public func getDocHistory(docId : rep.DocId) : async [ DocumentHistory ] {
     return [{ 
               docId = docId;
